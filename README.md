@@ -7,6 +7,6 @@ Before running the requirements.txt, remember to create a virtual environment!
 
 E.g. Create a virtual environment using conda 
 
-``` conda create -n [yourenvname] ```
+``` conda create -n [yourenvname] python=3.12```
 
 ``` source activate [yourenvname] ```
