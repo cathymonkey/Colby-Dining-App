@@ -9,7 +9,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydatabase.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
-login_manager = LoginManager(app)
+#login_manager = LoginManager(app)
 
 # Register blueprint for routes
 app.register_blueprint(main_blueprint)
