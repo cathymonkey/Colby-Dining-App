@@ -18,7 +18,6 @@ class Food(db.Model):
     calories = db.Column(db.Integer)
     fav = db.relationship('Favorites', backref = 'food')
 
-
 class Favorites(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     created_at = db.Column(db.Date, nullable = False)

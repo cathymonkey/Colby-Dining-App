@@ -9,10 +9,6 @@ main_blueprint = Blueprint('main', __name__)
 def index():
     return render_template('index.html')
 
-@main_blueprint.route('/about')
-def about():
-    return render_template('about.html')
-
 @main_blueprint.route('/menu')
 def menu():
     return render_template('menu.html')
@@ -23,5 +19,6 @@ def contact():
 
 @main_blueprint.route('/userdashboard')
 #@login_required 
+#Comment out for Google OAuth implement
 def userdashboard():
     return render_template('userdashboard.html')
