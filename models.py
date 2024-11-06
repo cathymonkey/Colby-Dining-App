@@ -10,13 +10,41 @@ class Student(db.Model):
     student_access_token = db.Column(db.String(255), unique = True, nullable = False)
     fav = db.relationship('Favorites', backref = 'student')
 
+class DiningHall(db.Model):
+    __tablename__ = 'dininghall'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), unique=True, nullable=False)
+
+    # Relationship to MealSchedule
+    schedules = db.relationship('MealSchedule', backref='dininghall')
+    foods = db.relationship('Food', backref='dininghall')
+
+
+class MealSchedule(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    dining_hall_id = db.Column(db.Integer, db.ForeignKey('dininghall.id'), nullable=False)
+    meal_type = db.Column(db.String(50), nullable=False)  # e.g., 'breakfast', 'lunch', 'dinner'
+    start_time = db.Column(db.Time, nullable=False)
+    end_time = db.Column(db.Time, nullable=False)
+
+    # Relationship to DiningHall (if you want to reference it directly in MealSchedule)
+    dining_hall = db.relationship('DiningHall', backref='mealschedule')
+
+
 class Food(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(255), nullable = False)
     description = db.Column(db.Text)
     label = db.Column(db.String(255))
     calories = db.Column(db.Integer)
+
     fav = db.relationship('Favorites', backref = 'food')
+
+    # Foreign key to link Food to DiningHall
+    dining_hall_id = db.Column(db.Integer, db.ForeignKey('dininghall.id'), nullable=False)
+    # Relationship to link Food to DiningHall
+    dining_hall = db.relationship('DiningHall', backref='food')
+
 
 
 class Favorites(db.Model):
@@ -54,3 +82,6 @@ class WaitTime(db.Model):
     date = db.Column(db.Date, nullable = False)
     day_of_week = db.Column(db.Integer, nullable = False)
     predicted_wait = db.Column(db.Integer, nullable = False)
+
+
+
