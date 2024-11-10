@@ -10,25 +10,16 @@ class Student(db.Model):
     student_access_token = db.Column(db.String(255), unique = True, nullable = False)
     fav = db.relationship('Favorites', backref = 'student')
 
-class DiningHall(db.Model):
-    __tablename__ = 'dininghall'
+# Association table for the many-to-many relationship between Food and Tag
+food_tags = db.Table('food_tags',
+    db.Column('food_id', db.Integer, db.ForeignKey('food.id'), primary_key=True),
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True)
+)
+
+class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255), unique=True, nullable=False)
-
-    # Relationship to MealSchedule
-    schedules = db.relationship('MealSchedule', backref='dininghall')
-    foods = db.relationship('Food', backref='dininghall')
-
-
-class MealSchedule(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    dining_hall_id = db.Column(db.Integer, db.ForeignKey('dininghall.id'), nullable=False)
-    meal_type = db.Column(db.String(50), nullable=False)  # e.g., 'breakfast', 'lunch', 'dinner'
-    start_time = db.Column(db.Time, nullable=False)
-    end_time = db.Column(db.Time, nullable=False)
-
-    # Relationship to DiningHall (if you want to reference it directly in MealSchedule)
-    dining_hall = db.relationship('DiningHall', backref='mealschedule')
+    name = db.Column(db.String(255), unique=True, nullable=False)  # e.g., 'Lunch', 'Vegetarian', 'Main Dining Hall'
+    type = db.Column(db.String(50), nullable=False)  # e.g., 'Meal', 'Diet', 'Location'
 
 
 class Food(db.Model):
@@ -40,10 +31,8 @@ class Food(db.Model):
 
     fav = db.relationship('Favorites', backref = 'food')
 
-    # Foreign key to link Food to DiningHall
-    dining_hall_id = db.Column(db.Integer, db.ForeignKey('dininghall.id'), nullable=False)
-    # Relationship to link Food to DiningHall
-    dining_hall = db.relationship('DiningHall', backref='food')
+    # Many-to-many relationship with Tag
+    tags = db.relationship('Tag', secondary=food_tags, backref='foods')
 
 
 

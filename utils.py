@@ -1,17 +1,20 @@
-from datetime import datetime
-from .models import MealSchedule
+from models import db, Tag, Food
 
-def get_current_meal(dining_hall):
-    current_time = datetime.now().time()
-    
-    # Query for the meal schedules for the current dining hall
-    current_schedule = MealSchedule.query.filter(
-        MealSchedule.dining_hall_id == dining_hall.id
-    ).all()
+def create_tags():
+    if Tag.query.count() == 0:  # Check if tags already exist
+        tags = [
+            Tag(name="Dana", type="Location"),
+            Tag(name="Roberts", type="Location"),
+            Tag(name="Foss", type="Location"),
+            Tag(name="Breakfast", type="Meal"),
+            Tag(name="Lunch", type="Meal"),
+            Tag(name="Dinner", type="Meal"),
+            Tag(name="Vegan", type="FoodType"),
+            Tag(name="Gluten-Free", type="FoodType"),
+            Tag(name="Vegetarian", type="FoodType")
+        ]
+        
+        db.session.bulk_save_objects(tags)
+        db.session.commit()
 
-    # Check which meal period the current time falls into
-    for schedule in current_schedule:
-        if schedule.start_time <= current_time < schedule.end_time:
-            return schedule.meal_type
 
-    return None  # If no meal period matches the current time

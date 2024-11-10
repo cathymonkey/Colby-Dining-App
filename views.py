@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for
 from flask import request
-from models import db, DiningHall, Food, MealSchedule
+from models import db, Food, Tag, food_tags
 from flask_login import login_required, current_user
 
 
@@ -8,35 +8,36 @@ main_blueprint = Blueprint('main', __name__)
 
 @main_blueprint.route('/')
 def index():
-    # Fetching the dining halls
-    dana_hall = DiningHall.query.filter_by(name="Dana").first()
-    roberts_hall = DiningHall.query.filter_by(name="Roberts").first()
-    foss_hall = DiningHall.query.filter_by(name="Foss").first()
+    # Fetching the tags for dining halls
+    dana_tag = Tag.query.filter_by(name="Dana", type="Location").first()
+    roberts_tag = Tag.query.filter_by(name="Roberts", type="Location").first()
+    foss_tag = Tag.query.filter_by(name="Foss", type="Location").first()
 
-    # Updated queries with explicit join conditions
+    # Fetching food items associated with each dining hall tag
     dana_food_items = Food.query \
-        .select_from(Food) \
-        .join(MealSchedule, MealSchedule.dining_hall_id == Food.dining_hall_id) \
-        .filter(MealSchedule.dining_hall == dana_hall) \
+        .join(food_tags) \
+        .join(Tag) \
+        .filter(Tag.id == dana_tag.id) \
         .all()
 
     roberts_food_items = Food.query \
-        .select_from(Food) \
-        .join(MealSchedule, MealSchedule.dining_hall_id == Food.dining_hall_id) \
-        .filter(MealSchedule.dining_hall == roberts_hall) \
+        .join(food_tags) \
+        .join(Tag) \
+        .filter(Tag.id == roberts_tag.id) \
         .all()
 
     foss_food_items = Food.query \
-        .select_from(Food) \
-        .join(MealSchedule, MealSchedule.dining_hall_id == Food.dining_hall_id) \
-        .filter(MealSchedule.dining_hall == foss_hall) \
+        .join(food_tags) \
+        .join(Tag) \
+        .filter(Tag.id == foss_tag.id) \
         .all()
 
     # Rendering the template
     return render_template('index.html', 
-                           dana_food_items=dana_food_items, 
-                           roberts_food_items=roberts_food_items, 
-                           foss_food_items=foss_food_items)
+                        dana_food_items=dana_food_items, 
+                        roberts_food_items=roberts_food_items, 
+                        foss_food_items=foss_food_items)
+
 
 @main_blueprint.route('/about')
 def about():
