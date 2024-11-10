@@ -227,35 +227,80 @@
                     <h1 class="mb-5">Most Popular Items</h1>
                 </div>
                 <div class="tab-class text-center wow fadeInUp" data-wow-delay="0.1s">
+                    <!-- First Line: Location and Meal Selection -->
+                    <div class="selection-row">
+                        <div>
+                            <p class="selection-label">Dining Hall</p>
+                            <ul class="nav nav-pills d-inline-flex justify-content-center border-bottom mb-3">
+                                <li class="nav-item">
+                                    <input type="checkbox" id="all-dining-hall" onclick="toggleTabContent('all-dining-hall')">
+                                    <label for="all-dining-hall" class="nav-link">All</label>
+                                </li>
+                                <li class="nav-item">
+                                    <input type="checkbox" id="dana" onclick="toggleTabContent('dana')">
+                                    <label for="dana" class="nav-link">Dana</label>
+                                </li>
+                                <li class="nav-item">
+                                    <input type="checkbox" id="roberts" onclick="toggleTabContent('roberts')">
+                                    <label for="roberts" class="nav-link">Roberts</label>
+                                </li>
+                                <li class="nav-item">
+                                    <input type="checkbox" id="foss" onclick="toggleTabContent('foss')">
+                                    <label for="foss" class="nav-link">Foss</label>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <p class="selection-label">Meal</p>
+                            <ul class="nav nav-pills d-inline-flex justify-content-center border-bottom mb-3">
+                                <li class="nav-item">
+                                    <input type="checkbox" id="breakfast" onclick="toggleTabContent('breakfast')">
+                                    <label for="breakfast" class="nav-link">Breakfast</label>
+                                </li>
+                                <li class="nav-item">
+                                    <input type="checkbox" id="lunch" onclick="toggleTabContent('lunch')">
+                                    <label for="lunch" class="nav-link">Lunch</label>
+                                </li>
+                                <li class="nav-item">
+                                    <input type="checkbox" id="dinner" onclick="toggleTabContent('dinner')">
+                                    <label for="dinner" class="nav-link">Dinner</label>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Second Line: Food Type Selection -->
+                    <p class="selection-label">Food Type</p>
                     <ul class="nav nav-pills d-inline-flex justify-content-center border-bottom mb-5">
                         <li class="nav-item">
-                            <a class="d-flex align-items-center text-start mx-3 ms-0 pb-3 active" data-bs-toggle="pill" href="#tab-1">
-                                <i class="fa fa-coffee fa-2x text-primary"></i>
-                                <div class="ps-3">
-                                    <small class="text-body">Popular</small>
-                                    <h6 class="mt-n1 mb-0">Dana</h6>
-                                </div>
-                            </a>
+                            <input type="checkbox" id="vegan" onclick="toggleTabContent('Vegan')">
+                            <label for="vegan" class="nav-link">Vegan</label>
                         </li>
                         <li class="nav-item">
-                            <a class="d-flex align-items-center text-start mx-3 pb-3" data-bs-toggle="pill" href="#tab-2">
-                                <i class="fa fa-hamburger fa-2x text-primary"></i>
-                                <div class="ps-3">
-                                    <small class="text-body">Special</small>
-                                    <h6 class="mt-n1 mb-0">Roberts</h6>
-                                </div>
-                            </a>
+                            <input type="checkbox" id="vegetarian" onclick="toggleTabContent('Vegetarian')">
+                            <label for="vegetarian" class="nav-link">Vegetarian</label>
                         </li>
                         <li class="nav-item">
-                            <a class="d-flex align-items-center text-start mx-3 me-0 pb-3" data-bs-toggle="pill" href="#tab-3">
-                                <i class="fa fa-utensils fa-2x text-primary"></i>
-                                <div class="ps-3">
-                                    <small class="text-body">Lovely</small>
-                                    <h6 class="mt-n1 mb-0">Foss</h6>
-                                </div>
-                            </a>
+                            <input type="checkbox" id="glutenfree" onclick="toggleTabContent('Gluten Free')">
+                            <label for="glutenfree" class="nav-link">Gluten Free</label>
                         </li>
+                        <li class="nav-item">
+                            <input type="checkbox" id="farmtofork" onclick="toggleTabContent('Farm to Fork')">
+                            <label for="farmtofork" class="nav-link">Farm to Fork</label>
+                        </li>
+                        <li class="nav-item">
+                            <input type="checkbox" id="humane" onclick="toggleTabContent('Humane')">
+                            <label for="humane" class="nav-link">Humane</label>
+                        </li>
+                        <li class="nav-item">
+                            <input type="checkbox" id="organic" onclick="toggleTabContent('Organic')">
+                            <label for="organic" class="nav-link">Organic</label>
+                        </li>                        
                     </ul>
+
+                </div>
+                        
                     <div class="tab-content">
                         <div id="tab-1" class="tab-pane fade show p-0 active">
                             <div class="row g-4">

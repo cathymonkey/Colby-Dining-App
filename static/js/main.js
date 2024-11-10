@@ -74,6 +74,19 @@
         time: 2000
     });
 
+    // Tab toggle functionality
+    function toggleTabContent(tabId) {
+        // Use jQuery to select the button and tab content
+        const $tabButton = $(`[onclick="toggleTabContent('${tabId}')"]`);
+        const $content = $(`#${tabId}-content`);
+        
+        // Toggle active state for the button
+        $tabButton.toggleClass('active');
+        
+        // Toggle visibility of the content
+        $content.toggleClass('show fade'); // Toggle both 'show' and 'fade' classes for effect
+}
+
 
     // Modal Video
     $(document).ready(function () {
