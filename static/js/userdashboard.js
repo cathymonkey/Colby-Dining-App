@@ -81,8 +81,7 @@ class DiningHallWaitTimes {
                 <span class="badge bg-${statusColor} mb-2">
                     ${info.wait_time} min wait
                 </span>
-                <br>
-                <small class="text-muted">Current crowd: ${info.crowd} people</small>
+               
             </div>
             <div>
                 <a href="/menu?location=${encodeURIComponent(location)}" class="btn btn-primary py-2 px-2">View Menu</a>
