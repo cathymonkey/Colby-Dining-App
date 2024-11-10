@@ -10,8 +10,11 @@ def create_tags():
             Tag(name="Lunch", type="Meal"),
             Tag(name="Dinner", type="Meal"),
             Tag(name="Vegan", type="FoodType"),
-            Tag(name="Gluten-Free", type="FoodType"),
-            Tag(name="Vegetarian", type="FoodType")
+            Tag(name="Vegetarian", type="FoodType"),
+            Tag(name="Gluten Free", type="FoodType"),
+            Tag(name="Farm to Fork", type="FoodType"),
+            Tag(name="Humane", type="FoodType"),
+            Tag(name="Organic", type="FoodType")
         ]
         
         db.session.bulk_save_objects(tags)
