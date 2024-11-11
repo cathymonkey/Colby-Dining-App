@@ -682,3 +682,27 @@
         height: 140px;
     }
 }
+
+.food-item {
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.food-item h5 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.food-item p {
+    margin-bottom: 5px;
+}
+
+.food-item .badge {
+    margin-right: 5px;
+    font-size: 14px;
+    padding: 5px 10px;
+}
