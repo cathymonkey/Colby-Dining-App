@@ -502,7 +502,7 @@
         width: 100%;
     }
 
-    ul.nav {
+    ul.filter {
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
@@ -510,17 +510,17 @@
 
 }
 
-.nav {
+.filter {
     list-style: none;
     padding: 0;
     display: flex;
 }
 
-.nav-item {
+.filter-item {
     margin: 0 10px;
 }
 
-.nav-link {
+.filter-link {
     display: inline-block;
     padding: 10px 20px;
     font-size: 16px;
@@ -531,11 +531,11 @@
     transition: background-color 0.3s, color 0.3s;
 }
 
-.nav-item input[type="checkbox"] {
+.filter-item input[type="checkbox"] {
     display: none;
 }
 
-.nav-item input[type="checkbox"]:checked + .nav-link {
+.filter-item input[type="checkbox"]:checked + .filter-link {
     background-color: #333;
     color: #fff;
 }

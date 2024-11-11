@@ -2,50 +2,39 @@ from flask import Blueprint, render_template, redirect, url_for
 from flask import request
 from models import db, Food, Tag, food_tags
 from flask_login import login_required, current_user
+from utils import filter_foods, get_all_foods
 
 
 main_blueprint = Blueprint('main', __name__)
 
 @main_blueprint.route('/')
 def index():
-    # Fetching the tags for dining halls
-    dana_tag = Tag.query.filter_by(name="Dana", type="Location").first()
-    roberts_tag = Tag.query.filter_by(name="Roberts", type="Location").first()
-    foss_tag = Tag.query.filter_by(name="Foss", type="Location").first()
-
-    # Fetching food items associated with each dining hall tag
-    dana_food_items = Food.query \
-        .join(food_tags) \
-        .join(Tag) \
-        .filter(Tag.id == dana_tag.id) \
-        .all()
-
-    roberts_food_items = Food.query \
-        .join(food_tags) \
-        .join(Tag) \
-        .filter(Tag.id == roberts_tag.id) \
-        .all()
-
-    foss_food_items = Food.query \
-        .join(food_tags) \
-        .join(Tag) \
-        .filter(Tag.id == foss_tag.id) \
-        .all()
 
     # Rendering the template
-    return render_template('index.html', 
-                        dana_food_items=dana_food_items, 
-                        roberts_food_items=roberts_food_items, 
-                        foss_food_items=foss_food_items)
+    return render_template('index.html')
 
 
 @main_blueprint.route('/about')
 def about():
     return render_template('about.html')
 
-@main_blueprint.route('/menu')
+
+
+@main_blueprint.route('/menu', methods=['GET'])
 def menu():
-    return render_template('menu.html')
+    # Get the selected tags from the query parameters
+    selected_tags = request.args.getlist('tags')  # List of tags selected by the user
+
+    # If no tags are selected, return all foods
+    if not selected_tags:
+        filtered_foods = get_all_foods()  # Fetch all food items
+    else:
+        filtered_foods = filter_foods(selected_tags)  # Filter foods based on selected tags
+
+    # Pass the filtered food items and selected tags to the template
+    return render_template('menu.html', foods=filtered_foods, selected_tags=selected_tags)
+
+
 
 @main_blueprint.route('/contact')
 def contact():
@@ -55,3 +44,4 @@ def contact():
 #@login_required 
 def userdashboard():
     return render_template('userdashboard.html')
+
