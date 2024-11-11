@@ -217,6 +217,8 @@ def get_wait_times():
 @main_blueprint.route('/userdashboard')
 @login_required
 def user_dashboard():
+    if isinstance(current_user, Administrator):
+        return redirect(url_for('main.admin_dashboard'))
     return render_template('userdashboard.html')
 
 @main_blueprint.route('/logout', methods=['POST'])

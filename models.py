@@ -6,11 +6,24 @@ from flask_login import UserMixin
 
 db = SQLAlchemy()
 
-class Student(db.Model):
+class Student(db.Model, UserMixin):
     student_email = db.Column(db.String(255), primary_key=True)
     student_access_token = db.Column(db.String(255), unique=True, nullable=False)
     fav = db.relationship('Favorites', backref='student')
 
+    def get_id(self):
+        return self.student_email
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+    
+    
 # Association table for the many-to-many relationship between Food and Tag
 food_tags = db.Table('food_tags',
     db.Column('food_id', db.Integer, db.ForeignKey('food.id'), primary_key=True),

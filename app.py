@@ -8,6 +8,7 @@ from models import db
 from views import main_blueprint
 from auth import auth_bp, google_bp, login_manager, init_admin_model
 import os
+from dotenv import load_dotenv
 
 # Set environment variable for development
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' 

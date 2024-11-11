@@ -3,7 +3,7 @@ from flask_dance.contrib.google import make_google_blueprint, google
 from flask_login import LoginManager, login_user, logout_user, current_user
 from flask_dance.consumer import oauth_authorized
 from flask_dance.consumer.storage.session import SessionStorage
-from models import db, Administrator
+from models import db, Administrator, Student
 import os
 from functools import wraps
 
@@ -31,8 +31,13 @@ google_bp = make_google_blueprint(
 )
 
 @login_manager.user_loader
-def load_user(admin_email):
-    return Administrator.query.get(admin_email)
+def load_user(user_email):
+    # Try loading as admin first
+    admin = Administrator.query.get(user_email)
+    if admin:
+        return admin
+    # If not admin, try loading as student
+    return Student.query.get(user_email)
 
 def init_admin_model():
     """Make Administrator model compatible with Flask-Login"""
@@ -86,14 +91,26 @@ def google_logged_in(blueprint, token):
 
     # Check if user is an admin
     admin = Administrator.query.get(email)
-    if not admin:
-        flash('You do not have administrative access.', 'error')
-        session.clear()
-        return False
+    if admin:
+        login_user(admin)
+        session['admin_email'] = admin.admin_email
+        session['is_admin'] = True
+    else:
+        # Handle regular student login
+        student = Student.query.get(email)
+        if not student:
+            # Create new student record if first time login
+            student = Student(
+                student_email=email,
+                student_access_token=token['access_token']
+            )
+            db.session.add(student)
+            db.session.commit()
+        
+        login_user(student)
+        session['student_email'] = student.student_email
+        session['is_admin'] = False
 
-    # Log in admin and store session info
-    login_user(admin)
-    session['admin_email'] = admin.admin_email
     session['google_name'] = user_info.get('name')
     session['google_picture'] = user_info.get('picture')
     
