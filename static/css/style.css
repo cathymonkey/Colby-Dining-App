@@ -706,3 +706,96 @@
     font-size: 14px;
     padding: 5px 10px;
 }
+
+/* Wait Times Section Styling */
+.wait-times-section {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    margin-bottom: 2rem;
+}
+
+.wait-times-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.wait-times-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    padding: 2rem;
+}
+
+.wait-time-card {
+    flex: 1;
+    min-width: 240px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.wait-time-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.location-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.wait-time {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 1rem 0;
+}
+
+.status-low {
+    color: #10B981;
+}
+
+.status-medium {
+    color: #F59E0B;
+}
+
+.status-high {
+    color: #EF4444;
+}
+
+.traffic-indicator {
+    font-size: 0.875rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.traffic-icon {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.last-updated {
+    font-size: 0.875rem;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .wait-times-container {
+        flex-direction: column;
+    }
+    
+    .wait-time-card {
+        width: 100%;
+    }
+}
