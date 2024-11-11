@@ -70,7 +70,7 @@
                         <a href="{{ url_for('main.contact') }}" class="nav-item nav-link">Contact</a>
                     </div>
                     <a href="{{ url_for('main.userdashboard') }}" class="btn btn-primary py-2 px-4">My Dashboard</a>
-
+                    <button onclick="window.location.href='/login'">Login with Google</button>
                 </div>
             </nav>
 
@@ -789,3 +789,105 @@
 </body>
 
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Feedback Popup HTML -->
+<div id="feedback-popup" style="display: none;">
+    <h3>Are you satisfied with your experience?</h3>
+    <div class="feedback-buttons">
+        <button class="yes-btn" onclick="handleFeedback(true)">Yes</button>
+        <button class="no-btn" onclick="handleFeedback(false)">No</button>
+    </div>
+    <div id="reason-input" style="display: none;">
+        <label for="reason">Why are you not satisfied?</label>
+        <textarea id="reason" rows="3" placeholder="Type your reason here"></textarea>
+    </div>
+    <button id="submit-feedback" style="display: none;" onclick="submitFeedback()">Submit</button>
+</div>
+
+<!-- Feedback Popup Styles -->
+<style>
+    #feedback-popup {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 300px;
+        background: #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        padding: 20px;
+        border-radius: 8px;
+        z-index: 1000;
+    }
+    .feedback-buttons button {
+        padding: 8px 12px;
+        margin: 8px 4px;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+    .feedback-buttons .yes-btn {
+        background: #4CAF50;
+        color: #fff;
+    }
+    .feedback-buttons .no-btn {
+        background: #F44336;
+        color: #fff;
+    }
+</style>
+
+<!-- Feedback Popup JavaScript -->
+<script>
+    // Show the popup after 5 seconds
+    window.onload = function() {
+        setTimeout(showPopup, 5000);
+    };
+
+    function showPopup() {
+        document.getElementById('feedback-popup').style.display = 'block';
+    }
+
+    function handleFeedback(isSatisfied) {
+        if (isSatisfied) {
+            submitFeedback({ satisfied: true });
+        } else {
+            document.getElementById('reason-input').style.display = 'block';
+            document.getElementById('submit-feedback').style.display = 'inline-block';
+        }
+    }
+
+    function submitFeedback(feedbackData = null) {
+        if (!feedbackData) {
+            feedbackData = {
+                satisfied: false,
+                reason: document.getElementById('reason').value
+            };
+        }
+
+        fetch('/submit-feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(feedbackData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Feedback submitted:', data);
+            document.getElementById('feedback-popup').style.display = 'none';
+        })
+        .catch(error => console.error('Error submitting feedback:', error));
+    }
+</script>

@@ -2,13 +2,21 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
-
 db = SQLAlchemy()
 
-class Student(db.Model):
-    student_email = db.Column(db.String(255), primary_key = True)
-    student_access_token = db.Column(db.String(255), unique = True, nullable = False)
-    fav = db.relationship('Favorites', backref = 'student')
+class Student(UserMixin, db.Model):  # Inherit from UserMixin
+    student_email = db.Column(db.String(255), primary_key=True)
+    student_access_token = db.Column(db.String(255), unique=True, nullable=False)
+    fav = db.relationship('Favorites', backref='student')
+
+    def get_id(self):
+        # Override get_id to return the primary key
+        return self.student_email
+    def set_access_token(self, token):
+        self.student_access_token = generate_password_hash(token)
+
+    def check_access_token(self, token):
+        return check_password_hash(self.student_access_token, token)
 
 class Food(db.Model):
     id = db.Column(db.Integer, primary_key = True)
