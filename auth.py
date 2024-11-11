@@ -6,6 +6,9 @@ from flask_dance.consumer.storage.session import SessionStorage
 from models import db, Administrator, Student
 import os
 from functools import wraps
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Force allow HTTP for development
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -20,8 +23,8 @@ auth_bp = Blueprint('auth', __name__)
 
 # Initialize Google OAuth blueprint
 google_bp = make_google_blueprint(
-    client_id="1015740593977-rgj3g9af6jschsnd9jjh0ham19b1bi62.apps.googleusercontent.com",
-    client_secret="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",
+    client_id=os.getenv('GOOGLE_OAUTH_CLIENT_ID'),
+    client_secret=os.getenv('GOOGLE_OAUTH_CLIENT_SECRET'),
     scope=[
         "openid",
         "https://www.googleapis.com/auth/userinfo.email",
