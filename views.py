@@ -1,9 +1,11 @@
-from flask import Blueprint, render_template, jsonify, request, redirect, url_for
+from flask import Blueprint, render_template, jsonify, request, redirect, session, url_for
+from flask_login import current_user, login_required
 from datetime import datetime
 import os
 import logging
+from auth import admin_required
 from dining_predictor import DiningHallPredictor
-from models import db, FeedbackQuestion
+from models import db, FeedbackQuestion, Administrator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -25,7 +27,6 @@ def initialize_predictor():
             data_dir=os.path.join(base_dir, 'data')
         )
         
-        # Check if we need to train models
         if not any(predictor.models):
             logger.info("No saved models found, training new models...")
             df = predictor.load_data('October-*.csv')
@@ -38,9 +39,15 @@ def initialize_predictor():
         logger.error(f"Failed to initialize predictor: {str(e)}")
         return False
 
-# Initialize when the blueprint is created
+# Initialize predictor when blueprint is created
 initialize_predictor()
 
+@main_blueprint.context_processor
+def inject_user():
+    """Make current_user available to all templates"""
+    return dict(current_user=current_user)
+
+# Basic routes
 @main_blueprint.route('/')
 def index():
     return render_template('index.html')
@@ -61,57 +68,55 @@ def menu():
 def contact():
     return render_template('contact.html')
 
+# Dashboard routes
 @main_blueprint.route('/admin/dashboard')
+@login_required
+@admin_required
 def admin_dashboard():
     return render_template('admindashboard.html')
 
+@main_blueprint.route('/userdashboard')
+@login_required
+def userdashboard():
+    if isinstance(current_user, Administrator):
+        return redirect(url_for('main.admin_dashboard'))
+    return render_template('userdashboard.html')
+
+# Feedback question routes
 @main_blueprint.route('/admin/feedback-question', methods=['POST'])
+@login_required
+@admin_required
 def create_feedback_question():
     try:
-        question_text = request.form.get('questionText')
-        question_type = request.form.get('questionType')
-        active_start_date = datetime.strptime(request.form.get('activeStartDate'), '%Y-%m-%d').date()
-        active_end_date = datetime.strptime(request.form.get('activeEndDate'), '%Y-%m-%d').date()
-
         new_question = FeedbackQuestion(
-            question_text=question_text,
-            question_type=question_type,
-            active_start_date=active_start_date,
-            active_end_date=active_end_date
+            question_text=request.form.get('questionText'),
+            question_type=request.form.get('questionType'),
+            active_start_date=datetime.strptime(request.form.get('activeStartDate'), '%Y-%m-%d').date(),
+            active_end_date=datetime.strptime(request.form.get('activeEndDate'), '%Y-%m-%d').date(),
+            administrator_id=current_user.admin_email
         )
         db.session.add(new_question)
         db.session.commit()
-
-        return jsonify({
-            'status': 'success',
-            'message': 'Question created successfully'
-        })
+        return jsonify({'status': 'success', 'message': 'Question created successfully'})
     except Exception as e:
         db.session.rollback()
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 400
+        return jsonify({'status': 'error', 'message': str(e)}), 400
 
 @main_blueprint.route('/admin/feedback-question/<int:question_id>', methods=['DELETE'])
+@login_required
+@admin_required
 def delete_feedback_question(question_id):
     try:
-        print(f"Attempting to delete question {question_id}")  # Debug log
         question = FeedbackQuestion.query.get_or_404(question_id)
+        if question.administrator_id != current_user.admin_email:
+            return jsonify({'status': 'error', 'message': 'Unauthorized to delete this question'}), 403
+        
         db.session.delete(question)
         db.session.commit()
-        print("Question deleted successfully")  # Debug log
-        return jsonify({
-            'status': 'success',
-            'message': 'Question deleted successfully'
-        })
+        return jsonify({'status': 'success', 'message': 'Question deleted successfully'})
     except Exception as e:
-        print(f"Error deleting question: {str(e)}")  # Debug log
         db.session.rollback()
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 400
+        return jsonify({'status': 'error', 'message': str(e)}), 400
 
 @main_blueprint.route('/api/admin/feedback-questions', methods=['GET'])
 def get_feedback_questions():
@@ -129,14 +134,12 @@ def get_feedback_questions():
             } for q in questions]
         })
     except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 500
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
+# Wait times API
 @main_blueprint.route('/api/wait-times')
 def get_wait_times():
-    """API endpoint to get wait time predictions for dining halls"""
+    """Get wait time predictions for dining halls"""
     try:
         if not predictor_initialized:
             logger.error("Predictor not properly initialized")
@@ -145,29 +148,21 @@ def get_wait_times():
         current_time = datetime.now()
         predictions = {}
         
-        # Get predictions for each dining hall
         for location in ['Dana', 'Roberts', 'Foss']:
             try:
                 prediction = predictor.predict_wait_times(current_time, location)
-                
                 if prediction:
-                    if prediction.get('status') == 'closed':
-                        predictions[location] = {
-                            'status': 'closed',
-                            'message': prediction['message']
-                        }
-                    else:
-                        predictions[location] = {
-                            'crowd': prediction['predicted_count'],
-                            'wait_time': prediction['wait_time_minutes'],
-                            'status': 'success'
-                        }
+                    predictions[location] = {
+                        'status': 'closed' if prediction.get('status') == 'closed' else 'success',
+                        'message': prediction.get('message', None),
+                        'crowd': prediction.get('predicted_count', None),
+                        'wait_time': prediction.get('wait_time_minutes', None)
+                    }
                 else:
                     predictions[location] = {
                         'status': 'error',
                         'message': 'No prediction available'
                     }
-                    
             except Exception as e:
                 logger.error(f"Error predicting for {location}: {str(e)}")
                 predictions[location] = {
@@ -186,14 +181,16 @@ def get_wait_times():
         return jsonify({
             'status': 'error',
             'message': 'Service temporarily unavailable',
-            'predictions': {
-                location: {
-                    'status': 'error',
-                    'message': 'Temporarily unavailable'
-                } for location in ['Dana', 'Roberts', 'Foss']
-            }
+            'predictions': {location: {'status': 'error', 'message': 'Temporarily unavailable'} 
+                          for location in ['Dana', 'Roberts', 'Foss']}
         }), 500
-
+    
 @main_blueprint.route('/userdashboard')
-def userdashboard():
+@login_required
+def user_dashboard():
     return render_template('userdashboard.html')
+
+@main_blueprint.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return redirect(url_for('main.index'))

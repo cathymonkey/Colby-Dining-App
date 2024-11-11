@@ -59,8 +59,18 @@
                         <a href="{{ url_for('main.menu') }}" class="nav-item nav-link active">Menu</a>
                         <a href="{{ url_for('main.contact') }}" class="nav-item nav-link">Contact</a>
                     </div>
-                    <a href="{{ url_for('main.userdashboard') }}" class="btn btn-primary py-2 px-4">My Dashboard</a>
-
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.admin_email %}
+                            <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-primary py-2 px-4">My Dashboard</a>
+                        {% else %}
+                            <a href="{{ url_for('main.userdashboard') }}" class="btn btn-primary py-2 px-4">My Dashboard</a>
+                        {% endif %}
+                        <form action="{{ url_for('auth.logout') }}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-light ms-3 py-2 px-4">Logout</button>
+                        </form>
+                    {% else %}
+                        <a href="{{ url_for('auth.google_login') }}" class="btn btn-primary py-2 px-4">LOG IN</a>
+                    {% endif %}
                 </div>
             </nav>
             <div class="container-xxl py-5 bg-dark hero-header mb-5">
