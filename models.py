@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
@@ -39,6 +40,18 @@ class Feedback(db.Model):
     created_at = db.Column(db.Date, nullable = False)
     update_at = db.Column(db.Date, nullable = False)
     response = db.relationship('Response', backref = 'feedback')
+
+class FeedbackQuestion(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    question_text = db.Column(db.Text, nullable=False)
+    question_type = db.Column(db.String(50), nullable=False)
+    active_start_date = db.Column(db.Date, nullable=False)
+    active_end_date = db.Column(db.Date, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    # administrator_id = db.Column(db.String(255), db.ForeignKey('administrator.admin_email'), nullable=False)
+    # administrator = db.relationship('Administrator', backref='feedback_questions')
+
 
 class Response(db.Model):
     id = db.Column(db.Integer, primary_key = True)

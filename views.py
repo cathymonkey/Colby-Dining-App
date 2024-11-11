@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, jsonify
+from flask import Blueprint, render_template, jsonify, request, redirect, url_for
 from datetime import datetime
 import os
 import logging
 from dining_predictor import DiningHallPredictor
+from models import db, FeedbackQuestion
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -20,9 +21,9 @@ def initialize_predictor():
     global predictor, predictor_initialized
     try:
         predictor = DiningHallPredictor(
-        model_dir=os.path.join(base_dir, 'ml_models'),
-        data_dir=os.path.join(base_dir, 'data')
-    )
+            model_dir=os.path.join(base_dir, 'ml_models'),
+            data_dir=os.path.join(base_dir, 'data')
+        )
         
         # Check if we need to train models
         if not any(predictor.models):
@@ -60,9 +61,78 @@ def menu():
 def contact():
     return render_template('contact.html')
 
-@main_blueprint.route('/userdashboard')
-def userdashboard():
-    return render_template('userdashboard.html')
+@main_blueprint.route('/admin/dashboard')
+def admin_dashboard():
+    return render_template('admindashboard.html')
+
+@main_blueprint.route('/admin/feedback-question', methods=['POST'])
+def create_feedback_question():
+    try:
+        question_text = request.form.get('questionText')
+        question_type = request.form.get('questionType')
+        active_start_date = datetime.strptime(request.form.get('activeStartDate'), '%Y-%m-%d').date()
+        active_end_date = datetime.strptime(request.form.get('activeEndDate'), '%Y-%m-%d').date()
+
+        new_question = FeedbackQuestion(
+            question_text=question_text,
+            question_type=question_type,
+            active_start_date=active_start_date,
+            active_end_date=active_end_date
+        )
+        db.session.add(new_question)
+        db.session.commit()
+
+        return jsonify({
+            'status': 'success',
+            'message': 'Question created successfully'
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 400
+
+@main_blueprint.route('/admin/feedback-question/<int:question_id>', methods=['DELETE'])
+def delete_feedback_question(question_id):
+    try:
+        print(f"Attempting to delete question {question_id}")  # Debug log
+        question = FeedbackQuestion.query.get_or_404(question_id)
+        db.session.delete(question)
+        db.session.commit()
+        print("Question deleted successfully")  # Debug log
+        return jsonify({
+            'status': 'success',
+            'message': 'Question deleted successfully'
+        })
+    except Exception as e:
+        print(f"Error deleting question: {str(e)}")  # Debug log
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 400
+
+@main_blueprint.route('/api/admin/feedback-questions', methods=['GET'])
+def get_feedback_questions():
+    try:
+        questions = FeedbackQuestion.query.order_by(FeedbackQuestion.created_at.desc()).all()
+        return jsonify({
+            'status': 'success',
+            'questions': [{
+                'id': q.id,
+                'question_text': q.question_text,
+                'question_type': q.question_type,
+                'active_start_date': q.active_start_date.isoformat(),
+                'active_end_date': q.active_end_date.isoformat(),
+                'created_at': q.created_at.isoformat() if q.created_at else None
+            } for q in questions]
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
 
 @main_blueprint.route('/api/wait-times')
 def get_wait_times():
@@ -78,8 +148,7 @@ def get_wait_times():
         # Get predictions for each dining hall
         for location in ['Dana', 'Roberts', 'Foss']:
             try:
-                # Use the correct method name here
-                prediction = predictor.predict_wait_times(current_time, location)  # Make sure this matches your class method name
+                prediction = predictor.predict_wait_times(current_time, location)
                 
                 if prediction:
                     if prediction.get('status') == 'closed':
@@ -124,3 +193,7 @@ def get_wait_times():
                 } for location in ['Dana', 'Roberts', 'Foss']
             }
         }), 500
+
+@main_blueprint.route('/userdashboard')
+def userdashboard():
+    return render_template('userdashboard.html')
