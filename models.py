@@ -7,9 +7,9 @@ from flask_login import UserMixin
 db = SQLAlchemy()
 
 class Student(db.Model):
-    student_email = db.Column(db.String(255), primary_key = True)
-    student_access_token = db.Column(db.String(255), unique = True, nullable = False)
-    fav = db.relationship('Favorites', backref = 'student')
+    student_email = db.Column(db.String(255), primary_key=True)
+    student_access_token = db.Column(db.String(255), unique=True, nullable=False)
+    fav = db.relationship('Favorites', backref='student')
 
 # Association table for the many-to-many relationship between Food and Tag
 food_tags = db.Table('food_tags',
@@ -24,8 +24,8 @@ class Tag(db.Model):
 
 
 class Food(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(255), nullable = False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text)
     label = db.Column(db.String(255))
     calories = db.Column(db.Integer)
@@ -44,19 +44,34 @@ class Favorites(db.Model):
     student_email = db.Column(db.String(255), db.ForeignKey('student.student_email'), nullable = False)
     food_id = db.Column(db.Integer, db.ForeignKey('food.id'), nullable = False)
 
-class Administrator(db.Model):
-    admin_email = db.Column(db.String(255), primary_key = True)
-    password_hashed = db.Column(db.String(128), nullable = False)
-    feedback = db.relationship('Feedback', backref = 'administrator')
+class Administrator(db.Model, UserMixin):
+    admin_email = db.Column(db.String(255), primary_key=True)
+    password_hashed = db.Column(db.String(128), nullable=False)
+    google_id = db.Column(db.String(255), unique=True)  # For OAuth
+    fullname = db.Column(db.String(255))  # From Google
+    given_name = db.Column(db.String(255))  # From Google
+    family_name = db.Column(db.String(255))  # From Google
+    picture = db.Column(db.String(255))  # Google profile picture URL
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_login = db.Column(db.DateTime)
+    feedback = db.relationship('Feedback', backref='administrator')
+    feedback_questions = db.relationship('FeedbackQuestion', backref='administrator')
+
+    def get_id(self):
+        """Required for Flask-Login"""
+        return self.admin_email
+
+    def __repr__(self):
+        return f'<Administrator {self.admin_email}>'
 
 class Feedback(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
-    admin_email = db.Column(db.String(255), db.ForeignKey('administrator.admin_email'), nullable = False)
-    content = db.Column(db.Text, nullable = False)
+    id = db.Column(db.Integer, primary_key=True)
+    admin_email = db.Column(db.String(255), db.ForeignKey('administrator.admin_email'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
     num_responses = db.Column(db.Integer)
-    created_at = db.Column(db.Date, nullable = False)
-    update_at = db.Column(db.Date, nullable = False)
-    response = db.relationship('Response', backref = 'feedback')
+    created_at = db.Column(db.Date, nullable=False)
+    update_at = db.Column(db.Date, nullable=False)
+    response = db.relationship('Response', backref='feedback')
 
 class FeedbackQuestion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -66,8 +81,7 @@ class FeedbackQuestion(db.Model):
     active_end_date = db.Column(db.Date, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
-    # administrator_id = db.Column(db.String(255), db.ForeignKey('administrator.admin_email'), nullable=False)
-    # administrator = db.relationship('Administrator', backref='feedback_questions')
+    administrator_id = db.Column(db.String(255), db.ForeignKey('administrator.admin_email'), nullable=False)
 
 
 class Response(db.Model):

@@ -106,26 +106,6 @@ body {
     font-size: 0.875rem;
 }
 
-.btn-primary {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-}
-
-.btn-primary:hover {
-    background-color: #0b5ed7;
-    border-color: #0a58ca;
-}
-
-.btn-outline-primary {
-    color: #0d6efd;
-    border-color: #0d6efd;
-}
-
-.btn-outline-primary:hover {
-    background-color: #0d6efd;
-    color: #fff;
-}
-
 /* Feedback Section */
 #feedbackList {
     max-height: 400px;

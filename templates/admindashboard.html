@@ -36,6 +36,7 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4 px-lg-5 py-3 py-lg-0">
             <a href="{{ url_for('main.index') }}" class="navbar-brand p-0">
                 <h1 class="text-primary m-0"><i class="fa fa-utensils me-3"></i>Colby Dining</h1>
+                <!-- <img src="img/logo.png" alt="Logo"> -->
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
                 <span class="fa fa-bars"></span>
@@ -46,7 +47,18 @@
                     <a href="{{ url_for('main.menu') }}" class="nav-item nav-link">Menu</a>
                     <a href="{{ url_for('main.contact') }}" class="nav-item nav-link">Contact</a>
                 </div>
-                <a href="#" class="btn btn-primary py-2 px-4">Logout</a>
+                {% if current_user.is_authenticated %}
+                    {% if current_user.admin_email %}
+                        <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-primary py-2 px-4">My Dashboard</a>
+                    {% else %}
+                        <a href="{{ url_for('main.userdashboard') }}" class="btn btn-primary py-2 px-4">My Dashboard</a>
+                    {% endif %}
+                    <form action="{{ url_for('auth.logout') }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-light ms-3 py-2 px-4">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{{ url_for('auth.google_login') }}" class="btn btn-primary py-2 px-4">LOG IN</a>
+                {% endif %}
             </div>
         </nav>
 
