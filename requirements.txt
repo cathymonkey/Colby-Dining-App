@@ -7,6 +7,10 @@ numpy==1.22.4
 pandas==1.4.4
 scikit-learn==1.2.2
 python-dateutil==2.8.2
+Flask-Dance==7.0.0  
+Blinker==1.7.0     
+requests==2.31.0   
+oauthlib==3.2.2
 
 # Specify platform-specific wheels
 --only-binary=numpy
