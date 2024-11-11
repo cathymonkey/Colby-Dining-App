@@ -14,12 +14,15 @@ import logging
 from auth import admin_required
 from dining_predictor import DiningHallPredictor
 from models import db, FeedbackQuestion, Administrator
+from email_utils import EmailSender
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 main_blueprint = Blueprint('main', __name__)
+
+email_sender = EmailSender()
 
 # Initialize predictor
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -225,5 +228,47 @@ def user_dashboard():
 def logout():
     session.clear()
     return redirect(url_for('main.index'))
+
+@main_blueprint.route('/submit_feedback', methods=['POST'])
+def submit_feedback():
+    try:
+        # Get form data
+        name = request.form.get('name')
+        email = request.form.get('email')
+        feedback_type = request.form.get('feedback_type')
+        message = request.form.get('message')
+        
+        # Validate required fields
+        if not all([name, email, feedback_type, message]):
+            return jsonify({
+                'success': False,
+                'message': 'Please fill in all required fields.'
+            }), 400
+            
+        # Use the instance method
+        success = email_sender.send_feedback_email(
+            name=name,
+            email=email,
+            feedback_type=feedback_type,
+            message=message
+        )
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Thank you for your feedback! We will get back to you soon.'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'There was an error sending your feedback. Please try again later.'
+            }), 500
+            
+    except Exception as e:
+        print(f"Error processing feedback: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'An unexpected error occurred. Please try again later.'
+        }), 500
 
 

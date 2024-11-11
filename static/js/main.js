@@ -151,3 +151,58 @@
     
 })(jQuery);
 
+// Contact form submission handler
+document.addEventListener('DOMContentLoaded', function() {
+    const contactForm = document.getElementById('contactForm');
+    const submitButton = document.getElementById('submitButton');
+    const formMessage = document.getElementById('formMessage');
+    
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Disable submit button and show loading state
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
+            
+            // Get form data
+            const formData = new FormData(contactForm);
+            
+            // Submit form
+            fetch('/submit_feedback', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Show success/error message
+                formMessage.style.display = 'block';
+                formMessage.className = data.success ? 
+                    'alert alert-success mt-3' : 'alert alert-danger mt-3';
+                formMessage.textContent = data.message;
+                
+                // Reset form on success
+                if (data.success) {
+                    contactForm.reset();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                formMessage.style.display = 'block';
+                formMessage.className = 'alert alert-danger mt-3';
+                formMessage.textContent = 'An error occurred. Please try again later.';
+            })
+            .finally(() => {
+                // Re-enable submit button
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Send Message';
+                
+                // Hide message after 5 seconds
+                setTimeout(() => {
+                    formMessage.style.display = 'none';
+                }, 5000);
+            });
+        });
+    }
+});
+
