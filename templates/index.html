@@ -69,7 +69,9 @@
                     <div class="row align-items-center g-5">
                         <div class="col-lg-6 text-center text-lg-start">
                             <h1 class="display-3 text-white animated slideInLeft">Welcome to<br>Colby Dining Experience Portal</h1>
-                            <p class="text-white animated slideInLeft mb-4 pb-2">Here you can view the menus and availability of all Colby dining halls, comment and favorite dishes and give direct feedbacks for Colby dining.</p>
+                            <p class="text-white animated slideInLeft mb-4 pb-2">Check real-time dining hall wait times, browse menus with dietary filters, save your favorite dishes, 
+                                and receive notifications when they're available. Help us improve by participating in our feedback system - 
+                                every response helps make dining better for everyone!</p>
                             <a href="" class="btn btn-primary py-sm-3 px-sm-5 me-3 animated slideInLeft">Explore All Dining Halls</a>
                         </div>
                         <div class="col-lg-6 text-center text-lg-end overflow-hidden">
@@ -80,53 +82,6 @@
             </div>
         </div>
         <!-- Navbar & Hero End -->
-
-
-<!--        &lt;!&ndash; Service Start &ndash;&gt;-->
-<!--        <div class="container-xxl py-5">-->
-<!--            <div class="container">-->
-<!--                <div class="row g-4">-->
-<!--                    <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.1s">-->
-<!--                        <div class="service-item rounded pt-3">-->
-<!--                            <div class="p-4">-->
-<!--                                <i class="fa fa-3x fa-user-tie text-primary mb-4"></i>-->
-<!--                                <h5>Master Chefs</h5>-->
-<!--                                <p>Diam elitr kasd sed at elitr sed ipsum justo dolor sed clita amet diam</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.3s">-->
-<!--                        <div class="service-item rounded pt-3">-->
-<!--                            <div class="p-4">-->
-<!--                                <i class="fa fa-3x fa-utensils text-primary mb-4"></i>-->
-<!--                                <h5>Quality Food</h5>-->
-<!--                                <p>Diam elitr kasd sed at elitr sed ipsum justo dolor sed clita amet diam</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.5s">-->
-<!--                        <div class="service-item rounded pt-3">-->
-<!--                            <div class="p-4">-->
-<!--                                <i class="fa fa-3x fa-cart-plus text-primary mb-4"></i>-->
-<!--                                <h5>Online Order</h5>-->
-<!--                                <p>Diam elitr kasd sed at elitr sed ipsum justo dolor sed clita amet diam</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.7s">-->
-<!--                        <div class="service-item rounded pt-3">-->
-<!--                            <div class="p-4">-->
-<!--                                <i class="fa fa-3x fa-headset text-primary mb-4"></i>-->
-<!--                                <h5>24/7 Service</h5>-->
-<!--                                <p>Diam elitr kasd sed at elitr sed ipsum justo dolor sed clita amet diam</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-        <!-- Service End -->
-
 
         <!-- About Start -->
         <div class="container-xxl py-5">
@@ -150,8 +105,10 @@
                     </div>
                     <div class="col-lg-6">
                         <h5 class="section-title ff-secondary text-start text-primary fw-normal">Customized Dining Experience</h5>
-                        <h1 class="mb-4">Favorites<i class="fa fa-utensils text-primary me-2"></i>& Popular Options</h1>
-                        <p class="mb-4">You can now score each dish and favorite the dishes you like best. You can also choose to receive a notification when it shows up.</p>
+                        <h1 class="mb-4">Track Your Favorites <i class="fa fa-utensils text-primary me-2"></i> & Discover Popular Dishes</h1>
+                        <p class="mb-4">Never miss your favorite meals again! Rate dishes, add them to your favorites, and get instant 
+                            notifications when they're on the menu. See what's trending with real-time popularity scores 
+                            from the Colby community.</p>
                         <p class="mb-4"> </p>
                         <div class="row g-4 mb-4">
                             <div class="col-sm-6">
@@ -173,7 +130,7 @@
                                 </div>
                             </div>
                         </div>
-                        <a class="btn btn-primary py-3 px-5 mt-2" href="">Read More</a>
+                        <a href="{{ url_for('main.dining_experience') }}" class="btn btn-primary py-3 px-5 mt-2">READ MORE</a>
                     </div>
                 </div>
             </div>
@@ -182,25 +139,20 @@
 
 
         <!-- Wait time start -->
-        <div class="col-lg-12">
-        <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Waiting Time</h5>
-                    <div class="d-flex flex-row gap-3">
-                        <div class="border p-2 flex-fill text-center">
-                            <span class="d-block fw-bold">Dana</span>
-                            <small>Estimated waiting time: 10 minutes</small>
-
+        <div class="container-xxl py-5">
+            <div class="container">
+                <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+                    <h5 class="section-title ff-secondary text-center text-primary fw-normal">Real-Time Updates</h5>
+                    <h1 class="mb-5">Current Wait Times</h1>
+                </div>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title mb-0">Dining Hall Wait Times</h5>
+                            <small class="text-muted wait-times-updated"></small>
                         </div>
-                        <div class="border p-2 flex-fill text-center">
-                            <span class="d-block fw-bold">Roberts</span>
-                            <small>Estimated waiting time: 15 minutes</small>
-
-                        </div>
-                        <div class="border p-2 flex-fill text-center">
-                            <span class="d-block fw-bold">Foss</span>
-                            <small>Estimated waiting time: 8 minutes</small>
-
+                        <div class="d-flex flex-row gap-3 waiting-time-container">
+                            <!-- Wait times will be dynamically inserted here -->
                         </div>
                     </div>
                 </div>
@@ -696,59 +648,75 @@
         <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
             <div class="container py-5">
                 <div class="row g-5">
+                    <!-- Hours of Operation Column -->
                     <div class="col-lg-3 col-md-6">
-                        <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Company</h4>
-                        <a class="btn btn-link" href="">About Us</a>
-                        <a class="btn btn-link" href="">Contact Us</a>
-                        <a class="btn btn-link" href="">Reservation</a>
-                        <a class="btn btn-link" href="">Privacy Policy</a>
-                        <a class="btn btn-link" href="">Terms & Condition</a>
+                        <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Locations</h4>
+                        <h5 class="text-light fw-normal mb-3">Dana</h5>
+                        <p class="mb-2" style="font-size: 0.95rem;">Breakfast: 7:00 AM - 10:00 AM</p>
+                        <p class="mb-2" style="font-size: 0.95rem;">Lunch: 11:00 AM - 2:00 PM</p>
+                        <p class="mb-4" style="font-size: 0.95rem;">Dinner: 5:00 PM - 8:00 PM</p>
+                        
+                        <h5 class="text-light fw-normal mb-3">Roberts</h5>
+                        <p class="mb-2" style="font-size: 0.95rem;">Breakfast: 7:00 AM - 10:00 AM</p>
+                        <p class="mb-2" style="font-size: 0.95rem;">Breakfast: 10:00 AM - 10:45 AM</p>
+                        <p class="mb-2" style="font-size: 0.95rem;">Lunch: 11:00 AM - 2:00 PM</p>
+                        <p class="mb-2" style="font-size: 0.95rem;">Lunch Lite: 2:00 PM - 4:45 PM</p>
+                        <p class="mb-4" style="font-size: 0.95rem;">Dinner: 5:00 PM - 8:00 PM</p>
                     </div>
+
+                    <!-- More Hours Column -->
+                    <div class="col-lg-3 col-md-6">
+                        <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">More Locations</h4>
+                        <h5 class="text-light fw-normal mb-3">Foss Dining Hall</h5>
+                        <p class="mb-2" style="font-size: 0.95rem;">Lunch: 11:30 AM - 2:00 PM</p>
+                        <p class="mb-2" style="font-size: 0.95rem;">Lunch Lite: 2:00 PM - 4:45 PM</p>
+                        <p class="mb-4" style="font-size: 0.95rem;">Dinner: 5:00 PM - 9:00 PM</p>
+                        
+
+                        <h5 class="text-light fw-normal mb-3">Joseph Family Spa</h5>
+                        <p class="mb-2" style="font-size: 0.95rem;">Monday - Friday</p>
+                        <p style="font-size: 0.95rem;">8:00 AM - 4:00 PM</p>
+                    </div>
+
+                    <!-- Quick Links Column -->
+                    <div class="col-lg-3 col-md-6">
+                        <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Quick Links</h4>
+                        <a class="btn btn-link" href="{{ url_for('main.menu') }}" style="display: block; text-align: left; color: #fff; text-decoration: none; padding: 0; margin-bottom: 8px; transition: all 0.3s;">Today's Menu</a>
+                        <a class="btn btn-link" href="{{ url_for('main.userdashboard') }}" style="display: block; text-align: left; color: #fff; text-decoration: none; padding: 0; margin-bottom: 8px; transition: all 0.3s;">My Dashboard</a>
+                        <a class="btn btn-link" href="{{ url_for('main.contact') }}" style="display: block; text-align: left; color: #fff; text-decoration: none; padding: 0; margin-bottom: 8px; transition: all 0.3s;">Submit Feedback</a>
+                    </div>
+
+                    <!-- Contact Info Column -->
                     <div class="col-lg-3 col-md-6">
                         <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Contact</h4>
-                        <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>123 Street, New York, USA</p>
-                        <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+012 345 67890</p>
-                        <p class="mb-2"><i class="fa fa-envelope me-3"></i>info@example.com</p>
+                        <p class="mb-2" style="font-size: 0.95rem;"><i class="fa fa-map-marker-alt me-3"></i>Colby College, Waterville, ME</p>
+                        <p class="mb-2" style="font-size: 0.95rem;"><i class="fa fa-envelope me-3"></i>emily.damon@cafebonappetit.com</p>
                         <div class="d-flex pt-2">
-                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-twitter"></i></a>
-                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-facebook-f"></i></a>
-                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-youtube"></i></a>
-                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-linkedin-in"></i></a>
+                            <a class="btn btn-outline-light btn-social" href="https://www.instagram.com/colby.dining?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" style="margin-right: 10px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 35px;">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a class="btn btn-outline-light btn-social" href="https://www.facebook.com/ColbyDining" style="margin-right: 10px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 35px;">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-6">
-                        <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Opening</h4>
-                        <h5 class="text-light fw-normal">Monday - Saturday</h5>
-                        <p>09AM - 09PM</p>
-                        <h5 class="text-light fw-normal">Sunday</h5>
-                        <p>10AM - 08PM</p>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Newsletter</h4>
-                        <p>Dolor amet sit justo amet elitr clita ipsum elitr est.</p>
-                        <div class="position-relative mx-auto" style="max-width: 400px;">
-                            <input class="form-control border-primary w-100 py-3 ps-4 pe-5" type="text" placeholder="Your email">
-                            <button type="button" class="btn btn-primary py-2 position-absolute top-0 end-0 mt-2 me-2">SignUp</button>
-                        </div>
-                    </div>
+
+                
                 </div>
             </div>
+
+            <!-- Copyright Section -->
             <div class="container">
                 <div class="copyright">
                     <div class="row">
                         <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                            &copy; <a class="border-bottom" href="#">Your Site Name</a>, All Right Reserved. 
-							
-							<!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
-							Designed By <a class="border-bottom" href="https://htmlcodex.com">HTML Codex</a><br><br>
-                            Distributed By <a class="border-bottom" href="https://themewagon.com" target="_blank">ThemeWagon</a>
+                            &copy; <a class="border-bottom" href="#" style="color: #fff; text-decoration: none;">Colby Dining</a>, All Rights Reserved.
                         </div>
                         <div class="col-md-6 text-center text-md-end">
                             <div class="footer-menu">
-                                <a href="">Home</a>
-                                <a href="">Cookies</a>
-                                <a href="">Help</a>
-                                <a href="">FQAs</a>
+                                <a href="{{ url_for('main.index') }}" style="margin-right: 15px; padding-right: 15px; border-right: 1px solid rgba(255, 255, 255, .1); color: #fff; text-decoration: none;">Home</a>
+                                <a href="{{ url_for('main.menu') }}" style="margin-right: 15px; padding-right: 15px; border-right: 1px solid rgba(255, 255, 255, .1); color: #fff; text-decoration: none;">Menu</a>
+                                <a href="{{ url_for('main.contact') }}" style="color: #fff; text-decoration: none;">Contact</a>
                             </div>
                         </div>
                     </div>
@@ -776,6 +744,7 @@
 
     <!-- Template Javascript -->
     <script src="../static/js/main.js"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>
 
 </html>
