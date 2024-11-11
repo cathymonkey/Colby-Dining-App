@@ -477,3 +477,147 @@
     padding-right: 0;
     border-right: none;
 }
+
+.wait-time-card {
+    transition: all 0.3s ease;
+    background-color: #fff;
+    border-radius: 8px;
+    min-width: 200px;
+}
+
+.wait-time-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.wait-time-card .fw-bold {
+    color: var(--primary);
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+}
+
+.wait-time-card small {
+    display: block;
+    line-height: 1.4;
+}
+
+.waiting-time-container {
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .waiting-time-container {
+        flex-direction: column;
+    }
+    
+    .wait-time-card {
+        width: 100%;
+    }
+}
+
+.team-item {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.team-item .profile-circle {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 2rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.team-item .profile-circle::before {
+    content: '';
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    border: 2px solid #f1f1f1;
+    border-radius: 50%;
+}
+
+.team-item .profile-circle img {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid #fff;
+}
+
+.team-item .name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.team-item .title {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.team-item .contact-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.team-item .contact-info a {
+    color: #666;
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.team-item .contact-info i {
+    color: var(--primary);
+}
+
+.team-item .contact-info small {
+    width: 100%;
+    text-align: center;
+}
+
+.team-item .contact-info small.d-block {
+    display: inline-block;
+    word-break: break-word;
+}
+
+.team-item .contact-info .fa {
+    margin-right: 0.5rem;
+}
+
+.team-item .p-4 {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .team-item .profile-circle {
+        width: 160px;
+        height: 160px;
+    }
+
+    .team-item .profile-circle::before {
+        width: 180px;
+        height: 180px;
+    }
+
+    .team-item .profile-circle img {
+        width: 140px;
+        height: 140px;
+    }
+}

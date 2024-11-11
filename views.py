@@ -44,9 +44,13 @@ initialize_predictor()
 def index():
     return render_template('index.html')
 
-@main_blueprint.route('/about')
-def about():
-    return render_template('about.html')
+@main_blueprint.route('/dining-experience')
+def dining_experience():
+    return render_template('dining_experience.html')
+
+@main_blueprint.route('/team')
+def team():
+    return render_template('team.html')
 
 @main_blueprint.route('/menu')
 def menu():
