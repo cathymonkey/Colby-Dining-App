@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Colby Dining App</title>
+    <title>Colby Dining</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -35,8 +35,8 @@
         <!-- Navbar & Hero Start -->
         <div class="container-xxl position-relative p-0">
             <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4 px-lg-5 py-3 py-lg-0">
-                <a href="" class="navbar-brand p-0">
-                    <h1 class="text-primary m-0"><i class="fa fa-utensils me-3"></i>Restoran</h1>
+                <a href="{{ url_for('main.index') }}" class="navbar-brand p-0">
+                    <h1 class="text-primary m-0"><i class="fa fa-utensils me-3"></i>Colby Dining</h1>
                     <!-- <img src="img/logo.png" alt="Logo"> -->
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
@@ -44,21 +44,12 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarCollapse">
                     <div class="navbar-nav ms-auto py-0 pe-4">
-                        <a href="index.html" class="nav-item nav-link">Home</a>
-                        <a href="about.html" class="nav-item nav-link">About</a>
-                        <a href="service.html" class="nav-item nav-link">Service</a>
-                        <a href="menu.html" class="nav-item nav-link">Menu</a>
-                        <div class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
-                            <div class="dropdown-menu m-0">
-                                <a href="booking.html" class="dropdown-item">Booking</a>
-                                <a href="team.html" class="dropdown-item">Our Team</a>
-                                <a href="testimonial.html" class="dropdown-item">Testimonial</a>
-                            </div>
-                        </div>
-
+                        <a href="{{ url_for('main.index') }}" class="nav-item nav-link">Home</a>    
+                        <a href="{{ url_for('main.menu') }}" class="nav-item nav-link">Menu</a>
+                        <a href="{{ url_for('main.contact') }}" class="nav-item nav-link">Contact</a>
                     </div>
-                    <a href="index.html" class="btn btn-primary py-2 px-4">Back</a>
+                    <a href="{{ url_for('main.userdashboard') }}" class="btn btn-primary py-2 px-4">My Dashboard</a>
+
                 </div>
             </nav>
 
@@ -164,48 +155,103 @@
 
         <!-- Wait time start -->
         <div class="col-lg-12">
-        <div class="card border-0 shadow-sm h-100">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <h5 class="card-title">Waiting Time</h5>
-                    <div class="d-flex flex-row gap-3">
-                        <div class="border p-2 flex-fill text-center">
-                            <span class="d-block fw-bold">Dana</span>
-                            <small>Estimated waiting time: 10 minutes</small>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title mb-0">Waiting Time</h5>
+                        <small class="text-muted" id="last-updated"></small>
+                    </div>
+                    <div class="d-flex flex-row gap-3" id="wait-times-container">
+                        <!-- Dining halls will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Wait time end -->
 
-                        <div>
-                            <a href="index.html" class="btn btn-primary py-2 px-2">View Menu</a>
+
+
+        <!-- Footer Start -->
+        <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
+            <div class="container py-5">
+                <div class="row g-5">
+                    <!-- Hours of Operation Column -->
+                    <div class="col-lg-3 col-md-6">
+                        <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Locations</h4>
+                        <h5 class="text-light fw-normal mb-3">Dana</h5>
+                        <p class="mb-2" style="font-size: 0.95rem;">Breakfast: 7:00 AM - 10:00 AM</p>
+                        <p class="mb-2" style="font-size: 0.95rem;">Lunch: 11:00 AM - 2:00 PM</p>
+                        <p class="mb-4" style="font-size: 0.95rem;">Dinner: 5:00 PM - 8:00 PM</p>
+                        
+                        <h5 class="text-light fw-normal mb-3">Roberts</h5>
+                        <p class="mb-2" style="font-size: 0.95rem;">Breakfast: 7:00 AM - 10:00 AM</p>
+                        <p class="mb-2" style="font-size: 0.95rem;">Breakfast: 10:00 AM - 10:45 AM</p>
+                        <p class="mb-2" style="font-size: 0.95rem;">Lunch: 11:00 AM - 2:00 PM</p>
+                        <p class="mb-2" style="font-size: 0.95rem;">Lunch Lite: 2:00 PM - 4:45 PM</p>
+                        <p class="mb-4" style="font-size: 0.95rem;">Dinner: 5:00 PM - 8:00 PM</p>
+                    </div>
+
+                    <!-- More Hours Column -->
+                    <div class="col-lg-3 col-md-6">
+                        <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">More Locations</h4>
+                        <h5 class="text-light fw-normal mb-3">Foss Dining Hall</h5>
+                        <p class="mb-2" style="font-size: 0.95rem;">Lunch: 11:30 AM - 2:00 PM</p>
+                        <p class="mb-2" style="font-size: 0.95rem;">Lunch Lite: 2:00 PM - 4:45 PM</p>
+                        <p class="mb-4" style="font-size: 0.95rem;">Dinner: 5:00 PM - 9:00 PM</p>
+                        
+
+                        <h5 class="text-light fw-normal mb-3">Joseph Family Spa</h5>
+                        <p class="mb-2" style="font-size: 0.95rem;">Monday - Friday</p>
+                        <p style="font-size: 0.95rem;">8:00 AM - 4:00 PM</p>
+                    </div>
+
+                    <!-- Quick Links Column -->
+                    <div class="col-lg-3 col-md-6">
+                        <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Quick Links</h4>
+                        <a class="btn btn-link" href="{{ url_for('main.menu') }}" style="display: block; text-align: left; color: #fff; text-decoration: none; padding: 0; margin-bottom: 8px; transition: all 0.3s;">Today's Menu</a>
+                        <a class="btn btn-link" href="{{ url_for('main.userdashboard') }}" style="display: block; text-align: left; color: #fff; text-decoration: none; padding: 0; margin-bottom: 8px; transition: all 0.3s;">My Dashboard</a>
+                        <a class="btn btn-link" href="{{ url_for('main.contact') }}" style="display: block; text-align: left; color: #fff; text-decoration: none; padding: 0; margin-bottom: 8px; transition: all 0.3s;">Submit Feedback</a>
+                    </div>
+
+                    <!-- Contact Info Column -->
+                    <div class="col-lg-3 col-md-6">
+                        <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Contact</h4>
+                        <p class="mb-2" style="font-size: 0.95rem;"><i class="fa fa-map-marker-alt me-3"></i>Colby College, Waterville, ME</p>
+                        <p class="mb-2" style="font-size: 0.95rem;"><i class="fa fa-envelope me-3"></i>emily.damon@cafebonappetit.com</p>
+                        <div class="d-flex pt-2">
+                            <a class="btn btn-outline-light btn-social" href="https://www.instagram.com/colby.dining?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" style="margin-right: 10px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 35px;">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a class="btn btn-outline-light btn-social" href="https://www.facebook.com/ColbyDining" style="margin-right: 10px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 35px;">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
                         </div>
+                    </div>
 
+                
+                </div>
+            </div>
+
+            <!-- Copyright Section -->
+            <div class="container">
+                <div class="copyright">
+                    <div class="row">
+                        <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                            &copy; <a class="border-bottom" href="#" style="color: #fff; text-decoration: none;">Colby Dining</a>, All Rights Reserved.
                         </div>
-                        <div class="border p-2 flex-fill text-center">
-                            <span class="d-block fw-bold">Roberts</span>
-                            <small>Estimated waiting time: 15 minutes</small>
-
-                        <div>
-                            <a href="index.html" class="btn btn-primary py-2 px-2">View Menu</a>
-                        </div>
-
-                        </div>
-                        <div class="border p-2 flex-fill text-center">
-                            <span class="d-block fw-bold">Foss</span>
-                            <small>Estimated waiting time: 8 minutes</small>
-
-                        <div>
-                            <a href="index.html" class="btn btn-primary py-2 px-2">View Menu</a>
-                        </div>
-
+                        <div class="col-md-6 text-center text-md-end">
+                            <div class="footer-menu">
+                                <a href="{{ url_for('main.index') }}" style="margin-right: 15px; padding-right: 15px; border-right: 1px solid rgba(255, 255, 255, .1); color: #fff; text-decoration: none;">Home</a>
+                                <a href="{{ url_for('main.menu') }}" style="margin-right: 15px; padding-right: 15px; border-right: 1px solid rgba(255, 255, 255, .1); color: #fff; text-decoration: none;">Menu</a>
+                                <a href="{{ url_for('main.contact') }}" style="color: #fff; text-decoration: none;">Contact</a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Wait time end -->
-
-
-
-        <footer class="bg-dark text-light text-center py-4">
-            <p class="m-0">Colby Dining App</p>
-        </footer>
+        <!-- Footer End -->
 
     </div>
 
@@ -223,6 +269,7 @@
 
 
     <script src="js/main.js"></script>
+    <script src="{{ url_for('static', filename='js/userdashboard.js') }}"></script>
 </body>
 
 </html>
