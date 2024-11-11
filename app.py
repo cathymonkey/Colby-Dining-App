@@ -13,21 +13,22 @@ from dotenv import load_dotenv
 # Set environment variable for development
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' 
 
+load_dotenv()
 
 app = Flask(__name__, static_folder='static')
 
 # Configuration
-app.config['SECRET_KEY'] = 'secret keyyyyy'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydatabase.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = os.getenv('SQLALCHEMY_TRACK_MODIFICATIONS') == False
 
 # OAuth config
-app.config['GOOGLE_OAUTH_CLIENT_ID'] = "1015740593977-rgj3g9af6jschsnd9jjh0ham19b1bi62.apps.googleusercontent.com"
-app.config['GOOGLE_OAUTH_CLIENT_SECRET'] = "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"
+app.config['GOOGLE_OAUTH_CLIENT_ID'] = os.getenv('GOOGLE_OAUTH_CLIENT_ID')
+app.config['GOOGLE_OAUTH_CLIENT_SECRET'] = os.getenv('GOOGLE_OAUTH_CLIENT_SECRET')
 
 # Fix for OAuth HTTPS requirement in development
-app.config['OAUTHLIB_RELAX_TOKEN_SCOPE'] = True
-app.config['OAUTHLIB_INSECURE_TRANSPORT'] = True
+app.config['OAUTHLIB_RELAX_TOKEN_SCOPE'] = os.getenv('OAUTHLIB_RELAX_TOKEN_SCOPE') == True
+app.config['OAUTHLIB_INSECURE_TRANSPORT'] = os.getenv('OAUTHLIB_INSECURE_TRANSPORT') == True
 
 # Initialize extensions
 db.init_app(app)
