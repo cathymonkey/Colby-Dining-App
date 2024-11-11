@@ -14,7 +14,7 @@ from flask import Flask, session, abort, redirect, request
 from flask import render_template
 
 
-# Configure logging
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -143,8 +143,8 @@ def index():
 
 @main_blueprint.route('/submit-feedback', methods=['POST'])
 def submit_feedback():
-    feedback_data = request.json  # Get the JSON data sent by the frontend
-    # Here you can add code to process feedback, e.g., save to database or log it.
+    feedback_data = request.json
+    # process feedback in backend here
     return jsonify({"status": "success"}), 200
 
 

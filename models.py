@@ -10,7 +10,7 @@ class Student(UserMixin, db.Model):  # Inherit from UserMixin
     fav = db.relationship('Favorites', backref='student')
 
     def get_id(self):
-        # Override get_id to return the primary key
+
         return self.student_email
     def set_access_token(self, token):
         self.student_access_token = generate_password_hash(token)
