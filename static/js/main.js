@@ -75,6 +75,40 @@
     });
 
 
+
+    
+    function toggleTabContent(tabId) {
+        const $tabButton = $(`[onclick="toggleTabContent('${tabId}')"]`);
+        const $content = $(`#${tabId}-content`);
+        
+        $tabButton.toggleClass('active');
+        $content.toggleClass('show fade');
+    }
+
+
+    $(document).ready(function() {
+        $('#menu-search-form').submit(function(event) {
+            event.preventDefault(); // Prevent the default form submission
+            
+            // Collect form data (if necessary)
+            console.log("Form submitted");
+            
+            // You can do additional work here before submitting, like sending AJAX requests
+            
+            // After you're ready, submit the form
+            this.submit();  // This will trigger the form submission
+        });
+    });
+    
+    
+    
+    function submitForm() {
+        var form = document.getElementById("menu-search-form");
+        print("hi"+form)
+        form.submit();
+    }
+    
+
     // Modal Video
     $(document).ready(function () {
         var $videoSrc;
