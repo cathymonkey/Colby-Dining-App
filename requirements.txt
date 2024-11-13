@@ -12,6 +12,7 @@ Blinker==1.7.0
 requests==2.31.0   
 oauthlib==3.2.2
 python-dotenv==1.0.0
+mysql-connector-python==8.3.0
 
 # Specify platform-specific wheels
 --only-binary=numpy
