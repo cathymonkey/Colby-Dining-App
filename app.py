@@ -1,5 +1,5 @@
 from flask import Flask
-from models import db, Food, Tag, food_tags
+from models import db, Food, Tag, food_tags 
 from flask_login import LoginManager
 from views import main_blueprint
 from datetime import time
@@ -7,7 +7,6 @@ from utils import create_tags
 from auth import auth_bp, google_bp, login_manager, init_admin_model
 import os
 from dotenv import load_dotenv
-
 import logging
 import sys
 
@@ -25,7 +24,15 @@ logger.info("Starting application initialization...")
 
 # Configuration
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+database_url = os.getenv('JAWSDB_URL')
+if database_url:
+    database_url = database_url.replace('mysql://', 'mysql+mysqlconnector://')
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    logger.info("Using JawsDB URL for database connection")
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+    logger.info("Using default database URL")
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 logger.info("Database URL configured")
