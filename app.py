@@ -8,29 +8,77 @@ from auth import auth_bp, google_bp, login_manager, init_admin_model
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+import logging
+import sys
+
+# Set up logging
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Initialize Flask app
 app = Flask(__name__, static_folder='static')
 
+logger.info("Starting application initialization...")
+
 # Configuration
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+database_url = os.getenv('JAWSDB_URL')
+if database_url:
+    database_url = database_url.replace('mysql://', 'mysql+mysqlconnector://')
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    logger.info("Using JawsDB URL for database connection")
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+    logger.info("Using default database URL")
 
-# OAuth config
-app.config['GOOGLE_OAUTH_CLIENT_ID'] = os.getenv('GOOGLE_OAUTH_CLIENT_ID')
-app.config['GOOGLE_OAUTH_CLIENT_SECRET'] = os.getenv('GOOGLE_OAUTH_CLIENT_SECRET')
-app.config['OAUTHLIB_RELAX_TOKEN_SCOPE'] = True
-app.config['OAUTHLIB_INSECURE_TRANSPORT'] = os.getenv('FLASK_ENV') == 'development'
+logger.info("Database URL configured")
 
 # Initialize extensions
-db.init_app(app)
-login_manager.init_app(app)
+try:
+    db.init_app(app)
+    logger.info("Database initialized successfully")
+except Exception as e:
+    logger.error(f"Failed to initialize database: {e}")
+    raise
+
+try:
+    login_manager.init_app(app)
+    logger.info("Login manager initialized successfully")
+except Exception as e:
+    logger.error(f"Failed to initialize login manager: {e}")
+    raise
 
 # Initialize admin model
-init_admin_model()
+try:
+    init_admin_model()
+    logger.info("Admin model initialized successfully")
+except Exception as e:
+    logger.error(f"Failed to initialize admin model: {e}")
+    raise
+
+# # Load environment variables
+# load_dotenv()
+
+# # Initialize Flask app
+# app = Flask(__name__, static_folder='static')
+
+# # Configuration
+# app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# # OAuth config
+# app.config['GOOGLE_OAUTH_CLIENT_ID'] = os.getenv('GOOGLE_OAUTH_CLIENT_ID')
+# app.config['GOOGLE_OAUTH_CLIENT_SECRET'] = os.getenv('GOOGLE_OAUTH_CLIENT_SECRET')
+# app.config['OAUTHLIB_RELAX_TOKEN_SCOPE'] = True
+# app.config['OAUTHLIB_INSECURE_TRANSPORT'] = os.getenv('FLASK_ENV') == 'development'
+
+# # Initialize extensions
+# db.init_app(app)
+# login_manager.init_app(app)
+
+# # Initialize admin model
+# init_admin_model()
 
 # Register blueprints
 app.register_blueprint(auth_bp)
