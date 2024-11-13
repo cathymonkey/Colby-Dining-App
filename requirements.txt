@@ -10,6 +10,7 @@ python-dateutil==2.8.2
 Flask-Dance==7.0.0  
 Blinker==1.7.0     
 requests==2.31.0   
+Flask-Migrate==4.0.5
 oauthlib==3.2.2
 python-dotenv==1.0.0
 mysql-connector-python==8.3.0
