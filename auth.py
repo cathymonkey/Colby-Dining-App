@@ -30,8 +30,8 @@ google_bp = make_google_blueprint(
         "https://www.googleapis.com/auth/userinfo.email",
         "https://www.googleapis.com/auth/userinfo.profile",
     ],
-    redirect_url="/login/google/authorized",  
-    reprompt_consent=True,
+    # redirect_url="/login/google/authorized",  
+    # reprompt_consent=True,
     storage=SessionStorage()
     
 )
