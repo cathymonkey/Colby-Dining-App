@@ -1,7 +1,7 @@
 # Colby-Dining-App
 
--  Deployed on Heroku: [https://colby-dining-a5fb6bcb774e.herokuapp.com/]https://colby-dining-a5fb6bcb774e.herokuapp.com/
--  The current website is maintained at this repo: [https://github.com/AgLyx3/Colby-Dining-App-fork](https://github.com/AgLyx3/Colby-Dining-App-fork)
+:eyes::eyes: Currently deployed on Heroku: [https://colby-dining-a5fb6bcb774e.herokuapp.com/]https://colby-dining-a5fb6bcb774e.herokuapp.com/
+:exclamation: The current website is maintained at this repo: [https://github.com/AgLyx3/Colby-Dining-App-fork](https://github.com/AgLyx3/Colby-Dining-App-fork)
 
 
 
