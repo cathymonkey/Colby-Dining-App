@@ -5,9 +5,6 @@
 
 
 
-Creating a Colby Dining App (MVP)
-
-[https://cathymonkey.github.io/Colby-Dining-App/](https://cathymonkey.github.io/Colby-Dining-App/)
 
 Before running the requirements.txt, remember to create a virtual environment!
 
