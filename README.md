@@ -1,4 +1,7 @@
 # Colby-Dining-App
+
+:star:  Currently deployed on Heroku: [https://colby-dining-a5fb6bcb774e.herokuapp.com/](https://colby-dining-a5fb6bcb774e.herokuapp.com/)
+
 Creating a Colby Dining App (MVP)
 
 [https://cathymonkey.github.io/Colby-Dining-App/](https://cathymonkey.github.io/Colby-Dining-App/)
