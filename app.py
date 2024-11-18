@@ -72,12 +72,12 @@ app.register_blueprint(google_bp, url_prefix="/login")
 app.register_blueprint(main_blueprint)
 
 if __name__ == '__main__':
-    app.run(debug=False)
 
-with app.app_context():
-    try:
-        db.create_all()
-        create_tags()
-        logger.info("Database tables created successfully")
-    except Exception as e:
-        logger.error(f"Database initialization error: {e}")
+    with app.app_context():
+        try:
+            db.create_all()
+            create_tags()
+            logger.info("Database tables created successfully")
+            app.run(debug=False)
+        except Exception as e:
+            logger.error(f"Database initialization error: {e}")
