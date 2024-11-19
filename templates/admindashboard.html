@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Colby Dining - Admin Dashboard</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+
+    <!-- Favicon -->
+    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="{{ url_for('static', filename='lib/animate/animate.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css') }}" rel="stylesheet" />
+
+    <!-- Core Stylesheets -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/admindashboard.css') }}" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navbar & Hero Start -->
+    <div class="container-xxl position-relative p-0">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4 px-lg-5 py-3 py-lg-0">
+            <a href="{{ url_for('main.index') }}" class="navbar-brand p-0">
+                <h1 class="text-primary m-0"><i class="fa fa-utensils me-3"></i>Colby Dining</h1>
+                <!-- <img src="img/logo.png" alt="Logo"> -->
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                <span class="fa fa-bars"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <div class="navbar-nav ms-auto py-0 pe-4">
+                    <a href="{{ url_for('main.index') }}" class="nav-item nav-link">Home</a>    
+                    <a href="{{ url_for('main.menu') }}" class="nav-item nav-link">Menu</a>
+                    <a href="{{ url_for('main.contact') }}" class="nav-item nav-link">Contact</a>
+                </div>
+                {% if current_user.is_authenticated %}
+                    {% if current_user.admin_email %}
+                        <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-primary py-2 px-4">My Dashboard</a>
+                    {% else %}
+                        <a href="{{ url_for('main.userdashboard') }}" class="btn btn-primary py-2 px-4">My Dashboard</a>
+                    {% endif %}
+                    <form action="{{ url_for('auth.logout') }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-light ms-3 py-2 px-4">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{{ url_for('auth.google_login') }}" class="btn btn-primary py-2 px-4">LOG IN</a>
+                {% endif %}
+            </div>
+        </nav>
+
+        <div class="container-xxl py-5 bg-dark hero-header mb-5">
+            <div class="container my-5 pt-5 pb-4 text-center">
+                <h1 class="display-3 text-white mb-3 animated slideInDown">Admin Dashboard</h1>
+                <p class="text-white fs-5 mb-4">Real-time dining hall analytics and management</p>
+            </div>
+        </div>
+    </div>
+    <!-- Navbar & Hero End -->
+
+    <!-- Main Content Start -->
+    <div class="container-fluid py-5 px-4 px-lg-5">
+        <!-- Header Row with Last Updated -->
+        <div class="row mb-4">
+            <div class="col-12 d-flex justify-content-end">
+                <span class="text-muted" id="last-updated">
+                    <i class="fas fa-sync-alt me-2"></i>Last updated: --:--
+                </span>
+            </div>
+        </div>
+
+        <!-- Dining Hall Stats -->
+        <div class="row g-4 mb-5">
+            {% for location in ['Dana', 'Roberts', 'Foss'] %}
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm rounded-3">
+                    <div class="card-body text-center p-4">
+                        <h5 class="card-title text-primary mb-3">{{ location }}</h5>
+                        <div class="waiting-time mb-2" data-location="{{ location }}">--</div>
+                        <p class="text-muted mb-3">Current Wait Time</p>
+                        <div class="d-flex justify-content-center">
+                            <span class="badge bg-light text-dark px-3 py-2" id="{{ location.lower() }}-status">
+                                <i class="fas fa-users me-2"></i>Monitoring Traffic
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Main Chart -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="card-title m-0">
+                                <i class="fas fa-chart-line me-2"></i>Wait Times Analysis
+                            </h5>
+                            <select class="form-select form-select-sm w-auto">
+                                <option>Today</option>
+                                <option selected>Past Week</option>
+                                <option>Past Month</option>
+                            </select>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="waitTimesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Secondary Charts -->
+        <div class="row g-4 mb-5">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-3 h-100">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-4">
+                            <i class="fas fa-utensils me-2"></i>Popular Dishes
+                        </h5>
+                        <canvas id="popularFoodsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-3 h-100">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-4">
+                            <i class="fas fa-id-card me-2"></i>Daily Swipes
+                        </h5>
+                        <canvas id="swipeCountsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Section -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="card-title m-0">
+                                <i class="fas fa-comments me-2"></i>Feedback Management
+                            </h5>
+                            <div>
+                                <button class="btn btn-outline-primary btn-sm me-2" id="exportFeedback">
+                                    <i class="fas fa-download me-2"></i>Export Data
+                                </button>
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#feedbackModal">
+                                    <i class="fas fa-plus me-2"></i>Add Question
+                                </button>
+                            </div>
+                        </div>
+                        <div id="feedbackList" class="list-group">
+                            <!-- Feedback items populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Main Content End -->
+
+    <!-- Feedback Modal Start-->
+    <div class="modal fade" id="feedbackModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus-circle me-2"></i>New Feedback Question
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="feedbackForm">
+                        <div class="mb-3">
+                            <label for="questionText" class="form-label">Question Text</label>
+                            <textarea class="form-control" name="questionText" id="questionText" rows="3" 
+                                placeholder="Enter your question here..." required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="questionType" class="form-label">Question Type</label>
+                            <select class="form-select" name="questionType" id="questionType" required>
+                                <option value="">Select a question type</option>
+                                <option value="yes-no">Yes/No</option>
+                                <option value="rating">Rating (1-5)</option>
+                                <option value="text">Text Response</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="activeStartDate" class="form-label">Active Start Date</label>
+                            <input type="date" class="form-control" name="activeStartDate" 
+                                   id="activeStartDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="activeEndDate" class="form-label">Active End Date</label>
+                            <input type="date" class="form-control" name="activeEndDate" 
+                                   id="activeEndDate" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary px-4" id="submitQuestion">
+                        <i class="fas fa-save me-2"></i>Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Feedback Modal End-->
+
+    <!-- Footer Start -->
+    <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container py-5">
+            <div class="row g-5">
+                <!-- Hours of Operation Column -->
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Locations</h4>
+                    <h5 class="text-light fw-normal mb-3">Dana</h5>
+                    <p class="mb-2" style="font-size: 0.95rem;">Breakfast: 7:00 AM - 10:00 AM</p>
+                    <p class="mb-2" style="font-size: 0.95rem;">Lunch: 11:00 AM - 2:00 PM</p>
+                    <p class="mb-4" style="font-size: 0.95rem;">Dinner: 5:00 PM - 8:00 PM</p>
+                    
+                    <h5 class="text-light fw-normal mb-3">Roberts</h5>
+                    <p class="mb-2" style="font-size: 0.95rem;">Breakfast: 7:00 AM - 10:00 AM</p>
+                    <p class="mb-2" style="font-size: 0.95rem;">Breakfast: 10:00 AM - 10:45 AM</p>
+                    <p class="mb-2" style="font-size: 0.95rem;">Lunch: 11:00 AM - 2:00 PM</p>
+                    <p class="mb-2" style="font-size: 0.95rem;">Lunch Lite: 2:00 PM - 4:45 PM</p>
+                    <p class="mb-4" style="font-size: 0.95rem;">Dinner: 5:00 PM - 8:00 PM</p>
+                </div>
+
+                <!-- More Hours Column -->
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">More Locations</h4>
+                    <h5 class="text-light fw-normal mb-3">Foss Dining Hall</h5>
+                    <p class="mb-2" style="font-size: 0.95rem;">Lunch: 11:30 AM - 2:00 PM</p>
+                    <p class="mb-2" style="font-size: 0.95rem;">Lunch Lite: 2:00 PM - 4:45 PM</p>
+                    <p class="mb-4" style="font-size: 0.95rem;">Dinner: 5:00 PM - 9:00 PM</p>
+                    
+
+                    <h5 class="text-light fw-normal mb-3">Joseph Family Spa</h5>
+                    <p class="mb-2" style="font-size: 0.95rem;">Monday - Friday</p>
+                    <p style="font-size: 0.95rem;">8:00 AM - 4:00 PM</p>
+                </div>
+
+                <!-- Quick Links Column -->
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Quick Links</h4>
+                    <a class="btn btn-link" href="{{ url_for('main.menu') }}" style="display: block; text-align: left; color: #fff; text-decoration: none; padding: 0; margin-bottom: 8px; transition: all 0.3s;">Today's Menu</a>
+                    <a class="btn btn-link" href="{{ url_for('main.userdashboard') }}" style="display: block; text-align: left; color: #fff; text-decoration: none; padding: 0; margin-bottom: 8px; transition: all 0.3s;">My Dashboard</a>
+                    <a class="btn btn-link" href="{{ url_for('main.contact') }}" style="display: block; text-align: left; color: #fff; text-decoration: none; padding: 0; margin-bottom: 8px; transition: all 0.3s;">Submit Feedback</a>
+                </div>
+
+                <!-- Contact Info Column -->
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Contact</h4>
+                    <p class="mb-2" style="font-size: 0.95rem;"><i class="fa fa-map-marker-alt me-3"></i>Colby College, Waterville, ME</p>
+                    <p class="mb-2" style="font-size: 0.95rem;"><i class="fa fa-envelope me-3"></i>emily.damon@cafebonappetit.com</p>
+                    <div class="d-flex pt-2">
+                        <a class="btn btn-outline-light btn-social" href="https://www.instagram.com/colby.dining?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" style="margin-right: 10px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 35px;">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a class="btn btn-outline-light btn-social" href="https://www.facebook.com/ColbyDining" style="margin-right: 10px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 35px;">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                    </div>
+                </div>
+
+            
+            </div>
+        </div>
+
+        <!-- Copyright Section -->
+        <div class="container">
+            <div class="copyright">
+                <div class="row">
+                    <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                        &copy; <a class="border-bottom" href="#" style="color: #fff; text-decoration: none;">Colby Dining</a>, All Rights Reserved.
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <div class="footer-menu">
+                            <a href="{{ url_for('main.index') }}" style="margin-right: 15px; padding-right: 15px; border-right: 1px solid rgba(255, 255, 255, .1); color: #fff; text-decoration: none;">Home</a>
+                            <a href="{{ url_for('main.menu') }}" style="margin-right: 15px; padding-right: 15px; border-right: 1px solid rgba(255, 255, 255, .1); color: #fff; text-decoration: none;">Menu</a>
+                            <a href="{{ url_for('main.contact') }}" style="color: #fff; text-decoration: none;">Contact</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer End -->
+
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Template Javascript -->
+    <script src="{{ url_for('static', filename='lib/wow/wow.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/owlcarousel/owl.carousel.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/tempusdominus/js/moment.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/tempusdominus/js/moment-timezone.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js') }}"></script>
+    
+    <!-- Custom Javascript -->
+    <script src="{{ url_for('static', filename='js/admindashboard.js')}}"></script>

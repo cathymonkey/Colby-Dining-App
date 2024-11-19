@@ -1,0 +1,83 @@
+.filter-section {
+    background-color: #f8f9fa;
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.filter-section h4 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.filter-section .selection-label {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.filter-section .filter-item {
+    margin-right: 10px;
+}
+
+.filter-section .filter-link {
+    padding: 8px 16px;
+    border-radius: 20px;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.filter-section .filter-link:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.food-item {
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.selection-label {
+    font-size: 1.1rem;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.filter-link {
+    font-size: 0.95rem;
+    color: #555;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+}
+
+.filter-link.active,
+.filter-link:hover {
+    color: #fff;
+    background-color: #007bff;
+    border-radius: 0.25rem;
+}
+
+.food-item h5 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.food-item p {
+    margin-bottom: 5px;
+}
+
+.food-item .badge {
+    margin-right: 5px;
+    font-size: 14px;
+    padding: 5px 10px;
+}
+
