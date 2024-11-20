@@ -117,7 +117,7 @@ def userdashboard():
 # Feedback question routes
 @main_blueprint.route('/admin/feedback-question', methods=['POST'])
 @login_required
-@admin_required
+# @admin_required
 def create_feedback_question():
     try:
         new_question = FeedbackQuestion(
@@ -136,7 +136,7 @@ def create_feedback_question():
 
 @main_blueprint.route('/admin/feedback-question/<int:question_id>', methods=['DELETE'])
 @login_required
-@admin_required
+# @admin_required
 def delete_feedback_question(question_id):
     try:
         question = FeedbackQuestion.query.get_or_404(question_id)
