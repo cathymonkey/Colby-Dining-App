@@ -147,25 +147,7 @@
                     </div>
                 </div>
 
-                <div class="card food-item position-relative">
-    {% if current_user.is_authenticated %}
-    <button class="btn btn-link favorite-btn position-absolute top-0 end-0 p-2" 
-            data-food-id="{{ food.id }}"
-            data-is-favorite="{{ 'true' if food.id in user_favorites else 'false' }}">
-        <i class="fas fa-heart fa-lg {% if food.id in user_favorites %}text-danger{% else %}text-secondary{% endif %}"></i>
-    </button>
-    {% endif %}
-    <div class="card-body">
-        <h5 class="card-title">{{ food.name }}</h5>
-        <p class="card-text">{{ food.description }}</p>
-        <p class="card-text"><small class="text-muted">Calories: {{ food.calories }}</small></p>
-        <div class="mt-2">
-            {% for tag in food.tags %}
-            <span class="badge bg-secondary me-1">{{ tag }}</span>
-            {% endfor %}
-        </div>
-    </div>
-</div>
+            
 
                 <div class="col-lg-4">
                     <div class="card border-0 shadow-sm h-100">

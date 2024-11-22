@@ -81,7 +81,7 @@ if __name__ == '__main__':
             # Get logger instance
             logger = logging.getLogger(__name__)
             logger.info("Database initialized successfully")
-            app.run(debug=os.getenv('FLASK_ENV') == 'development')
+            app.run(debug=os.getenv('FLASK_ENV') == 'development', port=8000)
         except Exception as e:
             # Get logger instance
             logger = logging.getLogger(__name__)
