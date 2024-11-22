@@ -19,9 +19,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install pylint
         pip install pytest
+        
     - name: Analysing the code with pylint
       run: |
         pylint $(git ls-files '*.py')    
+        
     - name: Testing the code with pytest
       run: |
         pytest $(git ls-files '*test.py')
