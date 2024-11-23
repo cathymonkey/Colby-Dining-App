@@ -6,4 +6,5 @@ def test_user_set_password():
  assert user.password_hash is not None
  assert user.password_hash != 'password'
 
+
  
