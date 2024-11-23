@@ -1,6 +1,4 @@
 # Colby-Dining-App
-Creating a Colby Dining App (MVP)
-
 
 :star:  Currently deployed on Heroku: [https://colby-dining-a5fb6bcb774e.herokuapp.com/](https://colby-dining-a5fb6bcb774e.herokuapp.com/)
 
