@@ -1,3 +1,6 @@
+"""
+Helper methods for retrieving data from the database
+"""
 from website.models import db, Tag, Food
 
 def create_tags():
@@ -15,8 +18,7 @@ def create_tags():
             Tag(name="Farm to Fork", type="FoodType"),
             Tag(name="Humane", type="FoodType"),
             Tag(name="Organic", type="FoodType")
-        ]
-        
+        ]       
         db.session.bulk_save_objects(tags)
         db.session.commit()
 
@@ -24,7 +26,6 @@ def filter_foods(selected_tags):
     # Step 1: Retrieve tags matching the selected tags
     selected_tag_names = selected_tags  # Assume these are passed in from the query string or form
     tags = Tag.query.filter(Tag.name.in_(selected_tag_names)).all()
-    
     # Step 2: Query food items that have the selected tags
     filtered_foods = Food.query.join(Food.tags).filter(Tag.id.in_([tag.id for tag in tags])).all()
     
@@ -53,14 +54,21 @@ def format_menu_items(foods):
 
 def get_popular_foods(limit=5):
     # Query the most popular foods based on the number of favorites
-    popular_foods = Food.query.join(Food.fav).group_by(Food.id).order_by(db.func.count(Food.id).desc()).limit(limit).all()
-    
+    popular_foods = (Food.query
+                 .join(Food.fav)
+                 .group_by(Food.id)
+                 .order_by(db.func.count().desc())
+                 .limit(limit)
+                 .all())
     return format_menu_items(popular_foods)
 
 def get_food_counts_by_meal():
-    # Query the count of food items for each meal type
-    meal_counts = db.session.query(Tag.name, db.func.count(Food.id)).join(Food.tags).filter(Tag.type == 'Meal').group_by(Tag.name).all()
-    
+    #Query the count of food items for each meal type
+    meal_counts = (db.session.query(Tag.name, db.func.count(Food.id))
+               .join(Food.tags)
+               .filter(Tag.type == 'Meal')
+               .group_by(Tag.name)
+               .all())
     return dict(meal_counts)
 
 def get_food_counts_by_diet():
