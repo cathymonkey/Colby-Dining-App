@@ -33,7 +33,6 @@ class DiningHallPredictor:
                 os.makedirs(directory)
                     # Try to load existing models
         self.load_saved_models()
-
     def load_saved_models(self):
         """Load pre-trained models if they exist"""
         for hall in self.dining_halls:
