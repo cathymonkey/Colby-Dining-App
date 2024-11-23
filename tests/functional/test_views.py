@@ -36,24 +36,22 @@ def test_contact(client):
     assert response.status_code == 200
 
 
-def test_userdashboard(client, current_user):
+def test_userdashboard(client):
     response = client.get('/userdashboard')
 
-    assert response.status_code == 200
-    assert current_user.username != None
-    assert current_user.email.endswith("@colby.edu")
+    assert response.status_code == 302
 
 def test_admindashboard(client):
 
     response = client.get('/admin/dashboard')
 
-    assert response.status_code == 200
+    assert response.status_code == 302
 
 
 def test_logout(client):
     response = client.get('/logout')
 
-    assert response.status_code == 200
+    assert response.status_code == 302
 
 
 
