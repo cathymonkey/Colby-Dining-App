@@ -5,7 +5,7 @@ import datetime
 @pytest.fixture
 def student():
     return Student(
-        student_email='student@example.com',
+        student_email='student@colby.edu',
         student_access_token='12345678'
     )
 
@@ -31,7 +31,7 @@ def favorite(student, food_with_tags):
 @pytest.fixture
 def administrator():
     return Administrator(
-        admin_email='admin@example.com',
+        admin_email='admin@colby.edu',
         password_hashed='hashedpassword',
         google_id='googleid123',
         fullname='Admin Fullname',
@@ -61,7 +61,7 @@ def feedback_question(administrator):
 
 # Test Student
 def test_student_get_id(student):
-    assert student.get_id() == 'student@example.com'
+    assert student.get_id() == 'student@colby.edu'
 
 def test_student_is_authenticated(student):
     assert student.is_authenticated() is True
@@ -89,10 +89,10 @@ def test_favorite_association(favorite):
 
 # Test Admin
 def test_administrator_get_id(administrator):
-    assert administrator.get_id() == 'admin@example.com'
+    assert administrator.get_id() == 'admin@colby.edu'
 
 def test_administrator_repr(administrator):
-    assert repr(administrator) == '<Administrator admin@example.com>'
+    assert repr(administrator) == '<Administrator admin@colby.edu>'
 
 def test_administrator_feedback_question_association(feedback_question):
     feedback_question_obj, administrator = feedback_question
