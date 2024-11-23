@@ -74,6 +74,9 @@ def create_app(test_config=None):
         #    logger.info("Using default database URL")
    else:
        app.config.update(test_config)
+       
+   if not app.config.get('SQLALCHEMY_DATABASE_URI'):
+        raise RuntimeError('SQLALCHEMY_DATABASE_URI must be set')
 
    # Initialize extensions
    try:

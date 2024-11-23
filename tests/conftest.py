@@ -1,81 +1,120 @@
 import pytest
-from website import create_app, db
-from website.models import Administrator, Student
-from flask_login import login_user, current_user, logout_user
 import os
+from website import create_app
+from website.models import db as _db
 
-@pytest.fixture(scope='module')
-def test_app():
-    """Create a Flask app configured for testing"""
-    app = create_app()
-    app.config.update({
-        'TESTING': True,
+class TestConfig(dict):
+    """Test configuration."""
+    SECRET_KEY = 'test'
+    TESTING = True
+    # Explicitly set the database URI as a class attribute
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    WTF_CSRF_ENABLED = False
+    
+    # Mock Google OAuth settings
+    GOOGLE_OAUTH_CLIENT_ID = 'test-client-id'
+    GOOGLE_OAUTH_CLIENT_SECRET = 'test-client-secret'
+    OAUTHLIB_RELAX_TOKEN_SCOPE = True
+    OAUTHLIB_INSECURE_TRANSPORT = True
+    
+    # Mock API credentials
+    MENU_API_USERNAME = 'test-api-user'
+    MENU_API_PASSWORD = 'test-api-pass'
+    
+    # Other settings
+    SERVER_NAME = 'localhost'
+    CACHE_DIR = 'tests/test_cache'
+    PREFERRED_URL_SCHEME = 'http'
+
+    def __iter__(self):
+        for key in dir(self):
+            if not key.startswith('_'):
+                yield key
+
+    def __getitem__(self, key):
+        return getattr(self, key)
+    
+    def get(self, key, default=None):
+        return getattr(self, key, default)
+
+@pytest.fixture(scope='session')
+def app():
+    """Create application for the tests."""
+    # Create an instance of TestConfig
+    test_config = TestConfig()
+    
+    # Create the app with the test config
+    _app = create_app()  # First create without config
+    
+    # Explicitly update the config
+    _app.config.update({
         'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
-        'WTF_CSRF_ENABLED': False,  
-        'SECRET_KEY': 'test-secret-key'
+        'TESTING': True,
+        'SECRET_KEY': 'test',
+        'WTF_CSRF_ENABLED': False,
+        'GOOGLE_OAUTH_CLIENT_ID': 'test-client-id',
+        'GOOGLE_OAUTH_CLIENT_SECRET': 'test-client-secret',
+        'OAUTHLIB_RELAX_TOKEN_SCOPE': True,
+        'OAUTHLIB_INSECURE_TRANSPORT': True,
+        'MENU_API_USERNAME': 'test-api-user',
+        'MENU_API_PASSWORD': 'test-api-pass',
+        'SERVER_NAME': 'localhost',
+        'PREFERRED_URL_SCHEME': 'http',
+        'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     })
-    return app
+    
+    # Setup app context
+    ctx = _app.app_context()
+    ctx.push()
 
-@pytest.fixture(scope='module')
-def test_client(test_app):
-    """Create a test client"""
-    with test_app.test_client() as testing_client:
-        with test_app.app_context():
-            yield testing_client
+    # Initialize and create database
+    _db.init_app(_app)
+    _db.create_all()
+    
+    yield _app
+    
+    # Cleanup
+    _db.session.remove()
+    _db.drop_all()
+    ctx.pop()
 
-@pytest.fixture(scope='module')
-def init_database(test_app):
-    """Initialize test database with sample users"""
-    with test_app.app_context():
-        db.create_all()
+@pytest.fixture
+def db(app):
+    """Create a fresh database for each test."""
+    _db.drop_all()
+    _db.create_all()
+    return _db
 
-        # Create test admin
-        admin = Administrator(
-            admin_email='admin@colby.edu',
-            password_hashed='pbkdf2:sha256:260000$test_hash',
-            google_id='test_google_id',
-            fullname='Test Admin',
-            given_name='Test',
-            family_name='Admin'
-        )
-        admin.set_password('test_password')
+@pytest.fixture
+def client(app):
+    """Create a test client for the app."""
+    return app.test_client()
 
-        # Create test student
-        student = Student(
-            student_email='student@colby.edu',
-            student_access_token='test_token'
-        )
+@pytest.fixture
+def runner(app):
+    """Create a test runner for the app's Click commands."""
+    return app.test_cli_runner()
 
-        db.session.add(admin)
-        db.session.add(student)
-        db.session.commit()
+@pytest.fixture
+def auth_client(client):
+    """Create an authenticated test client."""
+    with client.session_transaction() as session:
+        session['google_oauth_token'] = {'access_token': 'fake-token'}
+        session['user_info'] = {
+            'email': 'test@colby.edu',
+            'name': 'Test User'
+        }
+    return client
 
-        yield db  
-
-        db.drop_all()
-
-@pytest.fixture(scope='function')
-def logged_in_admin(test_client, init_database):
-    """Create a logged-in admin session"""
-    test_client.post('/login', 
-        data={
+@pytest.fixture
+def admin_client(client):
+    """Create an admin test client."""
+    with client.session_transaction() as session:
+        session['google_oauth_token'] = {'access_token': 'fake-token'}
+        session['user_info'] = {
             'email': 'admin@colby.edu',
-            'password': 'test_password'
-        },
-        follow_redirects=True
-    )
-    yield test_client
-    # Log out after the test
-    test_client.get('/logout', follow_redirects=True)
-
-@pytest.fixture(scope='function')
-def logged_in_student(test_client, init_database):
-    """Create a logged-in student session"""
-    with test_client.session_transaction() as sess:
-        # Simulate Google OAuth login for student
-        sess['student_email'] = 'student@colby.edu'
-        sess['google_name'] = 'Test Student'
-    yield test_client
-    # Clean up session after test
-    with test_client.session_transaction() as sess:
-        sess.clear()
+            'name': 'Admin User'
+        }
+        session['is_admin'] = True
+    return client
