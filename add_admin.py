@@ -1,9 +1,10 @@
-from app import app, db
-from models import Administrator
+from website import create_app
+from website.models import Administrator
 from werkzeug.security import generate_password_hash
 from datetime import datetime
 
 def add_admin(email, password):
+    app = create_app()
     with app.app_context():
         try:
             # Create new admin
