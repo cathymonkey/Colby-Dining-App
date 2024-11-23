@@ -224,11 +224,9 @@ class DiningHallPredictor:
                 'busyness_level': busyness_level,
                 'status': 'success'
             }
-
         except Exception as e:
             logger.error("Error predicting for %s: %s", location, str(e))
             return None
-
 if __name__ == "__main__":
     # Configure logging
     logging.basicConfig(
