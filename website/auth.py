@@ -1,5 +1,5 @@
-from website import db
-from .models import User, Food, Tag, food_tags, FeedbackQuestion, Administrator
+# from website import db
+from website.models import Student, Food, Tag, food_tags, FeedbackQuestion, Administrator
 
 
 from flask import Blueprint, redirect, url_for, flash, session
@@ -7,7 +7,7 @@ from flask_dance.contrib.google import make_google_blueprint, google
 from flask_login import LoginManager, login_user, logout_user, current_user
 from flask_dance.consumer import oauth_authorized
 from flask_dance.consumer.storage.session import SessionStorage
-from models import db, Administrator, Student
+from website.models import db, Administrator, Student
 import os
 from functools import wraps
 from dotenv import load_dotenv

@@ -4,13 +4,13 @@ from flask_login import LoginManager
 # from views import main_blueprint
 # from auth import auth_blueprint
 
-from .models import User, Food, Tag, food_tags, FeedbackQuestion, Administrator
-from .views import main_blueprint
-from .auth import auth_blueprint
+from website.models import Student, Food, Tag, food_tags, FeedbackQuestion, Administrator
+from website.views import main_blueprint
+from website.auth import auth_bp, google_bp, login_manager, init_admin_model
 import os
 import sys
-from menu_routes import menu_bp
-from utils import create_tags
+from website.menu_routes import menu_bp
+from website.utils import create_tags
 import logging
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
@@ -37,6 +37,8 @@ import sys
 
 
 def create_app(test_config=None):
+   # Load environment variables
+   load_dotenv()
    
    # Initialize Flask app
    app = Flask(__name__, static_folder='static')
@@ -45,17 +47,6 @@ def create_app(test_config=None):
    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
    logger = logging.getLogger(__name__)
    logger.info("Starting application initialization...")
-   login_manager = LoginManager(app)
-   login_manager.login_view = 'auth.login'
-
-   @login_manager.user_loader
-   def load_user(id):
-    return User.query.get(int(id))
-   
-    # Register blueprint for routes
-    app.register_blueprint(main_blueprint)
-    app.register_blueprint(auth_blueprint)
-
 
    # Load configurations
    if test_config is None:
@@ -106,18 +97,3 @@ def create_app(test_config=None):
     })
 
    return app
-
-if __name__ == '__main__':
-    app = create_app()
-    with app.app_context():
-        try:
-            db.create_all()
-            create_tags()
-            # Get logger instance
-            logger = logging.getLogger(__name__)
-            logger.info("Database initialized successfully")
-            app.run(debug=os.getenv('FLASK_ENV') == 'development', port=8000)
-        except Exception as e:
-            # Get logger instance
-            logger = logging.getLogger(__name__)
-            logger.error(f"Startup error: {e}")

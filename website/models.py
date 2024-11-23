@@ -1,5 +1,5 @@
 
-from website import db
+# from website import db
 
 
 from flask_sqlalchemy import SQLAlchemy

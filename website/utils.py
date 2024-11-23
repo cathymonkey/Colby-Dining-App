@@ -1,4 +1,4 @@
-from models import db, Tag, Food
+from website.models import db, Tag, Food
 
 def create_tags():
     if Tag.query.count() == 0:  # Check if tags already exist
