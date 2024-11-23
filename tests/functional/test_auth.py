@@ -24,7 +24,7 @@ class TestGoogleAuthentication:
             }
         
         # Try to access a protected route
-        response = client.get('/userdashboard')  # or whatever protected route you have
+        response = client.get('/userdashboard') 
         
         # Should be redirected to login or unauthorized
         assert response.status_code in (302, 401, 403)
