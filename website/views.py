@@ -69,6 +69,9 @@ def inject_user():
 # Basic routes
 @main_blueprint.route('/')
 def index():
+    """
+    Routing to home page 
+    """
 
     # Rendering the template
     return render_template('index.html')
@@ -76,15 +79,24 @@ def index():
 
 @main_blueprint.route('/dining-experience')
 def dining_experience():
+    """
+    Routing to dining experience page 
+    """
     return render_template('dining_experience.html')
 
 @main_blueprint.route('/team')
 def team():
+    """
+    Routing to team page 
+    """
     return render_template('team.html')
 
 
 @main_blueprint.route('/menu', methods=['GET'])
 def menu():
+    """
+    Routing to menu page
+    """
     # Get the selected tags from the query parameters
     selected_tags = request.args.getlist('tags')  # List of tags selected by the user
 
@@ -104,6 +116,9 @@ def menu():
 
 @main_blueprint.route('/contact')
 def contact():
+    """
+    Routing to the contact page 
+    """
     return render_template('contact.html')
 
 # Dashboard routes
@@ -111,11 +126,17 @@ def contact():
 @login_required
 @admin_required
 def admin_dashboard():
+    """
+    Routing to admin dashboard
+    """
     return render_template('admindashboard.html')
 
 @main_blueprint.route('/userdashboard')
 @login_required
 def userdashboard():
+    """
+    Routing to the user dashboard
+    """
     if isinstance(current_user, Administrator):
         return redirect(url_for('main.admin_dashboard'))
     return render_template('userdashboard.html')
@@ -125,6 +146,9 @@ def userdashboard():
 @login_required
 @admin_required
 def create_feedback_question():
+    """
+    Method for admin to create feedback question on the admin dashboard
+    """
     try:
         new_question = FeedbackQuestion(
             question_text=request.form.get('questionText'),
@@ -144,6 +168,10 @@ def create_feedback_question():
 @login_required
 @admin_required
 def delete_feedback_question(question_id):
+    """
+    Method for removing question from the front-end 
+    (controversial: we don't actually want to delete the question from the database)
+    """
     try:
         question = FeedbackQuestion.query.get_or_404(question_id)
         if question.administrator_id != current_user.admin_email:
@@ -158,6 +186,9 @@ def delete_feedback_question(question_id):
 
 @main_blueprint.route('/api/admin/feedback-questions', methods=['GET'])
 def get_feedback_questions():
+    """
+    Method for getting feedback questions
+    """
     try:
         questions = FeedbackQuestion.query.order_by(FeedbackQuestion.created_at.desc()).all()
         return jsonify({
@@ -226,17 +257,28 @@ def get_wait_times():
 @main_blueprint.route('/userdashboard')
 @login_required
 def user_dashboard():
+    """
+    Routing to the dashboard based on the user roles: 
+    student -> user dashboard;
+    admin -> admin dashboard.
+    """
     if isinstance(current_user, Administrator):
         return redirect(url_for('main.admin_dashboard'))
     return render_template('userdashboard.html')
 
 @main_blueprint.route('/logout', methods=['POST'])
 def logout():
+    """
+    Log out 
+    """
     session.clear()
     return redirect(url_for('main.index'))
 
 @main_blueprint.route('/submit_feedback', methods=['POST'])
 def submit_feedback():
+    """
+    Method for submitting feedback
+    """
     try:
         # Get form data
         name = request.form.get('name')
@@ -280,6 +322,9 @@ def submit_feedback():
 
 @main_blueprint.route('/menu')
 def menu_page():  
+    """
+    Routing to menu page and filters
+    """
     today = datetime.now()
     return render_template('menu.html', 
         locations=["Dana", "Roberts", "Foss"],
@@ -297,6 +342,9 @@ def menu_page():
 
 @menu_bp.route('/api/menu/current', methods=['GET'])
 def get_current_menus():
+    """
+    API: getting current menus
+    """
     try:
         # Get menu service instance 
         menu_service = BonAppetitAPI(
@@ -320,6 +368,9 @@ def get_current_menus():
     
 @menu_bp.route('/<dining_hall>')
 def get_dining_hall_menu(dining_hall):
+    """
+    API: getting menus by dining hall
+    """
     try:
         menu_service = BonAppetitAPI(
             username=current_app.config['MENU_API_USERNAME'],
