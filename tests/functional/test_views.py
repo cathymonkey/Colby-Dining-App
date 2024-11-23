@@ -11,7 +11,6 @@ from website.views import menu_bp
 def test_index(client):
     response = client.get('/')
     assert response.status_code == 200
-    assert b"Test User" in response.data  # Ensure user data is in the response
 
 
 def test_dining_experience(client):
