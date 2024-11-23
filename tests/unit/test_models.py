@@ -3,14 +3,14 @@ from website.models import Student, Food, Tag, Favorites, FeedbackQuestion, Admi
 import datetime
 
 @pytest.fixture
-def student():
+def test_student():
     return Student(
         student_email='student@colby.edu',
         student_access_token='12345678'
     )
 
 @pytest.fixture
-def food_with_tags():
+def test_food_with_tags():
     tag1 = Tag(name='Lunch', type='Meal')
     tag2 = Tag(name='Vegetarian', type='Diet')
     food = Food(name='Salad', description='A healthy salad', calories=200)
@@ -18,18 +18,18 @@ def food_with_tags():
     return food, tag1, tag2
 
 @pytest.fixture
-def favorite(student, food_with_tags):
-    food, _, _ = food_with_tags
+def test_favorite(test_student, test_food_with_tags):  # Use correct fixture names here
+    food, _, _ = test_food_with_tags
     favorite = Favorites(
-        student_email=student.student_email,
+        student_email=test_student.student_email,
         food_id=food.id,
         created_at='2024-11-22',
         update_at='2024-11-22'
     )
-    return favorite, student, food
+    return favorite, test_student, food
 
 @pytest.fixture
-def administrator():
+def test_administrator():
     return Administrator(
         admin_email='admin@colby.edu',
         password_hashed='hashedpassword',
@@ -43,10 +43,9 @@ def administrator():
     )
 
 @pytest.fixture
-def feedback_question(administrator):
-    # Create the FeedbackQuestion instance
+def test_feedback_question(test_administrator):  # Correct fixture name here
     feedback_question = FeedbackQuestion(
-        administrator_id=administrator.admin_email,
+        administrator_id=test_administrator.admin_email,
         question_text='How was your experience?',
         question_type='Text',
         active_start_date=datetime.date(2024, 1, 1),
@@ -54,27 +53,27 @@ def feedback_question(administrator):
         created_at=datetime.datetime.utcnow()
     )
 
-    administrator.feedback_questions.append(feedback_question)
+    test_administrator.feedback_questions.append(feedback_question)
 
-    return feedback_question, administrator
+    return feedback_question, test_administrator
 
 
 # Test Student
-def test_student_get_id(student):
-    assert student.get_id() == 'student@colby.edu'
+def test_student_get_id(test_student):
+    assert test_student.get_id() == 'student@colby.edu'
 
-def test_student_is_authenticated(student):
-    assert student.is_authenticated() is True
+def test_student_is_authenticated(test_student):
+    assert test_student.is_authenticated() is True
 
-def test_student_is_active(student):
-    assert student.is_active() is True
+def test_student_is_active(test_student):
+    assert test_student.is_active() is True
 
-def test_student_is_anonymous(student):
-    assert student.is_anonymous() is False
+def test_student_is_anonymous(test_student):
+    assert test_student.is_anonymous() is False
 
 # Test Food and Tag Association
-def test_food_tags_association(food_with_tags):
-    food, tag1, tag2 = food_with_tags
+def test_food_tags_association(test_food_with_tags):
+    food, tag1, tag2 = test_food_with_tags
     assert tag1 in food.tags
     assert tag2 in food.tags
     assert food in tag1.foods
@@ -82,22 +81,21 @@ def test_food_tags_association(food_with_tags):
     assert len(food.tags) == 2
 
 # Test Favorites
-def test_favorite_association(favorite):
-    favorite_obj, student, food = favorite
+def test_favorite_association(test_favorite):
+    favorite_obj, student, food = test_favorite
     assert favorite_obj.student_email == student.student_email
     assert favorite_obj.food_id == food.id
 
 # Test Admin
-def test_administrator_get_id(administrator):
-    assert administrator.get_id() == 'admin@colby.edu'
+def test_administrator_get_id(test_administrator):
+    assert test_administrator.get_id() == 'admin@colby.edu'
 
-def test_administrator_repr(administrator):
-    assert repr(administrator) == '<Administrator admin@colby.edu>'
+def test_administrator_repr(test_administrator):
+    assert repr(test_administrator) == '<Administrator admin@colby.edu>'
 
-def test_administrator_feedback_question_association(feedback_question):
-    feedback_question_obj, administrator = feedback_question
+def test_administrator_feedback_question_association(test_feedback_question):
+    feedback_question_obj, test_administrator = test_feedback_question
 
-    assert feedback_question_obj.administrator_id == administrator.admin_email
-    assert feedback_question_obj in administrator.feedback_questions
-    assert feedback_question_obj.administrator == administrator
-
+    assert feedback_question_obj.administrator_id == test_administrator.admin_email
+    assert feedback_question_obj in test_administrator.feedback_questions
+    assert feedback_question_obj.administrator == test_administrator
