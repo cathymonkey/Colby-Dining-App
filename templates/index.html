@@ -58,7 +58,8 @@
                         <a href="{{ url_for('main.index') }}" class="nav-item nav-link active">Home</a>    
                         <a href="{{ url_for('main.menu') }}" class="nav-item nav-link">Menu</a>
                         <a href="{{ url_for('main.contact') }}" class="nav-item nav-link">Contact</a>
-                         <a href="{{ url_for('news.news_page') }}" class="nav-item nav-link">News</a>
+                        <a href="{{ url_for('news.news_page') }}" class="nav-item nav-link">News</a>
+                        <a href="{{ url_for('gemini.chat') }}" class="nav-item nav-link">Chatbot</a>
                     </div>
                     {% if current_user.is_authenticated %}
                         {% if current_user.admin_email %}

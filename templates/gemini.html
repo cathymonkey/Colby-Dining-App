@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Chatbot</title>
+    <!-- Bootstrap for styling -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Gemini Chatbot</h1>
+        <div class="card mt-4">
+            <div class="card-body">
+                <div id="chat-output" class="mb-4" style="height: 300px; overflow-y: auto;">
+                    <!-- Chat responses will appear here -->
+                </div>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="user-input" placeholder="Type your message here..." />
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" id="send-btn">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery and Bootstrap JS for interactivity -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sendButton = document.getElementById('send-btn');
+            const userInput = document.getElementById('user-input');
+            const chatOutput = document.getElementById('chat-output');
+
+            sendButton.addEventListener('click', function() {
+                const userMessage = userInput.value.trim();
+                if (userMessage) {
+                    // Append the user's message to the chat
+                    chatOutput.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
+                    userInput.value = ''; // Clear the input field
+
+                    // Send the message to the backend using Fetch API
+                    fetch('/gemini-chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `message=${encodeURIComponent(userMessage)}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Append the bot's response to the chat
+                        if (data.reply) {
+                            chatOutput.innerHTML += `<div><strong>Gemini:</strong> ${data.reply}</div>`;
+                        } else if (data.error) {
+                            chatOutput.innerHTML += `<div><strong>Error:</strong> ${data.error}</div>`;
+                        }
+                        // Scroll to the latest message
+                        chatOutput.scrollTop = chatOutput.scrollHeight;
+                    })
+                    .catch(error => {
+                        chatOutput.innerHTML += `<div><strong>Error:</strong> ${error.message}</div>`;
+                        chatOutput.scrollTop = chatOutput.scrollHeight;
+                    });
+                }
+            });
+
+            // Optional: Handle "Enter" key press to send message
+            userInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    sendButton.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
