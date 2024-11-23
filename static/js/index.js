@@ -13,12 +13,12 @@ function updateWaitTimes() {
                 Object.entries(data.predictions).forEach(([location, prediction]) => {
                     const status = prediction.status;
                     let waitTimeHtml = '';
-                    
+
                     if (status === 'success') {
                         // Determine status class based on wait time
                         let statusClass = 'status-low';
                         let statusText = 'Low Traffic';
-                        
+
                         if (prediction.wait_time > 15) {
                             statusClass = 'status-high';
                             statusText = 'High Traffic';
@@ -26,7 +26,7 @@ function updateWaitTimes() {
                             statusClass = 'status-medium';
                             statusText = 'Moderate Traffic';
                         }
-                        
+
                         waitTimeHtml = `
                             <div class="wait-time-card">
                                 <div class="location-name">${location}</div>
@@ -56,7 +56,7 @@ function updateWaitTimes() {
                                 </div>
                             </div>`;
                     }
-                    
+
                     waitTimesContainer.innerHTML += waitTimeHtml;
                 });
 
@@ -90,18 +90,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const contactForm = document.getElementById('contactForm');
     const submitButton = document.getElementById('submitButton');
     const formMessage = document.getElementById('formMessage');
-    
+
     if (contactForm) {
         contactForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             // Disable submit button and show loading state
             submitButton.disabled = true;
             submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
-            
+
             // Get form data
             const formData = new FormData(contactForm);
-            
+
             // Submit form
             fetch('/submit_feedback', {
                 method: 'POST',
@@ -111,10 +111,10 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 // Show success/error message
                 formMessage.style.display = 'block';
-                formMessage.className = data.success ? 
+                formMessage.className = data.success ?
                     'alert alert-success mt-3' : 'alert alert-danger mt-3';
                 formMessage.textContent = data.message;
-                
+
                 // Reset form on success
                 if (data.success) {
                     contactForm.reset();
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Re-enable submit button
                 submitButton.disabled = false;
                 submitButton.innerHTML = 'Submit';
-                
+
                 // Hide message after 5 seconds
                 setTimeout(() => {
                     formMessage.style.display = 'none';
@@ -139,3 +139,82 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const feedbackModal = document.getElementById('feedbackModal');
+
+    setTimeout(() => {
+
+        fetch('/feedback/get_active_feedback_question')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('No active feedback question found');
+                }
+            })
+            .then(data => {
+
+                feedbackModal.dataset.questionId = data.id;
+                document.getElementById('feedback-question-text').textContent = data.question_text;
+
+                feedbackModal.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error fetching feedback question:', error);
+            });
+    }, 2000);
+
+    const submitFeedbackButton = document.getElementById('submit-feedback');
+    if (submitFeedbackButton) {
+        submitFeedbackButton.addEventListener('click', () => {
+            const questionId = feedbackModal.dataset.questionId;
+            const selectedResponse = document.querySelector('input[name="response"]:checked');
+            const additionalFeedback = document.getElementById('additional-feedback').value;
+
+            if (!selectedResponse) {
+                alert('Please select Yes or No before submitting.');
+                return;
+            }
+
+            const response = selectedResponse.value;
+
+            fetch('/feedback/submit_feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    question_id: questionId,
+                    response: response,
+                    additional_feedback: response === 'no' ? additionalFeedback : null
+                })
+            })
+                .then(res => {
+                    if (res.ok) {
+                        alert('Thank you for your feedback!');
+                        feedbackModal.style.display = 'none'; // Hide modal
+                    } else {
+                        throw new Error('Failed to submit feedback');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error submitting feedback:', err);
+                    alert('Failed to submit feedback. Please try again.');
+                });
+        });
+    }
+
+    document.addEventListener('change', (event) => {
+        if (event.target.name === 'response') {
+            const additionalFeedbackContainer = document.getElementById('additional-feedback-container');
+            additionalFeedbackContainer.style.display = event.target.value === 'no' ? 'block' : 'none';
+        }
+    });
+
+});
+
+
+
+

@@ -9,6 +9,10 @@ import os
 from dotenv import load_dotenv
 import logging
 import sys
+from news import news_bp
+from feedback import feedback_bp
+
+
 
 # Set up logging
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
@@ -43,6 +47,7 @@ app.config['GOOGLE_OAUTH_CLIENT_SECRET'] = os.getenv('GOOGLE_OAUTH_CLIENT_SECRET
 app.config['OAUTHLIB_RELAX_TOKEN_SCOPE'] = True
 app.config['OAUTHLIB_INSECURE_TRANSPORT'] = os.getenv('FLASK_ENV') == 'development'
 
+
 # Initialize extensions
 try:
     db.init_app(app)
@@ -70,6 +75,8 @@ except Exception as e:
 app.register_blueprint(auth_bp)
 app.register_blueprint(google_bp, url_prefix="/login")
 app.register_blueprint(main_blueprint)
+app.register_blueprint(news_bp)
+app.register_blueprint(feedback_bp, url_prefix='/feedback')
 
 if __name__ == '__main__':
 
@@ -81,3 +88,4 @@ if __name__ == '__main__':
             app.run(debug=False)
         except Exception as e:
             logger.error(f"Database initialization error: {e}")
+

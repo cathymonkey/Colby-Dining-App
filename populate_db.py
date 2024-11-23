@@ -1,5 +1,5 @@
 from app import app, db
-from models import db, WaitTime, Food, Tag
+from models import db, WaitTime, Food, Tag, FeedbackQuestion
 from datetime import datetime, time, timedelta
 import random
 
@@ -37,6 +37,39 @@ def generate_wait_times():
     
     db.session.commit()
     print(f"Generated {WaitTime.query.count()} wait time records.")
+
+
+def add_active_feedback_question():
+    """Ensure there is an active feedback question in the database."""
+    now = datetime.utcnow()
+
+    # Check if there's already an active question
+    active_question = FeedbackQuestion.query.filter(
+        FeedbackQuestion.active_start_date <= now,
+        FeedbackQuestion.active_end_date >= now
+    ).first()
+
+    if not active_question:
+        # Create a new active question
+        active_start = now - timedelta(hours=1)  # Active since 1 hour ago
+        active_end = now + timedelta(days=7)     # Expires in 7 days
+
+        new_question = FeedbackQuestion(
+            question_text="Is the dining service satisfactory?",
+            question_type="yes_no",
+            active_start_date=active_start,
+            active_end_date=active_end,
+            created_at=now,
+            updated_at=now,
+            administrator_id="admin@example.com"  # Replace with a valid admin email in your database
+        )
+        db.session.add(new_question)
+        db.session.commit()
+        print(f"Added active feedback question: {new_question.question_text}")
+    else:
+        print("An active feedback question already exists.")
+
+
 
 def generate_foods_and_tags():
     # Create tags
@@ -129,3 +162,4 @@ with app.app_context():
     db.create_all()
     generate_wait_times() 
     generate_foods_and_tags()
+    add_active_feedback_question()

@@ -58,6 +58,7 @@
                         <a href="{{ url_for('main.index') }}" class="nav-item nav-link active">Home</a>    
                         <a href="{{ url_for('main.menu') }}" class="nav-item nav-link">Menu</a>
                         <a href="{{ url_for('main.contact') }}" class="nav-item nav-link">Contact</a>
+                         <a href="{{ url_for('news.news_page') }}" class="nav-item nav-link">News</a>
                     </div>
                     {% if current_user.is_authenticated %}
                         {% if current_user.admin_email %}
@@ -445,6 +446,13 @@
                 </div>
             </div>
 
+
+
+
+
+
+
+
             <!-- Copyright Section -->
             <div class="container">
                 <div class="copyright">
@@ -470,6 +478,52 @@
         <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
     </div>
 
+
+
+
+
+
+
+<div class="modal" id="feedbackModal" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;" data-question-id="">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Feedback</h5>
+                <button type="button" class="close" aria-label="Close" onclick="document.getElementById('feedbackModal').style.display = 'none';">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="feedback-question-text">Loading...</p>
+                <form id="feedback-form">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="response" id="response-yes" value="yes">
+                        <label class="form-check-label" for="response-yes">
+                            Yes
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="response" id="response-no" value="no">
+                        <label class="form-check-label" for="response-no">
+                            No
+                        </label>
+                    </div>
+                    <div id="additional-feedback-container" style="display: none; margin-top: 15px;">
+                        <textarea id="additional-feedback" class="form-control" rows="3" placeholder="Please provide additional details"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('feedbackModal').style.display = 'none';">Close</button>
+                <button type="button" class="btn btn-primary" id="submit-feedback">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -485,6 +539,12 @@
     <!-- Template Javascript -->
     <script src="../static/js/main.js"></script>
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+
+
+
 </body>
 
 </html>

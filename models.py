@@ -112,5 +112,12 @@ class WaitTime(db.Model):
     day_of_week = db.Column(db.Integer, nullable = False)
     predicted_wait = db.Column(db.Integer, nullable = False)
 
+class News(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    preview = db.Column(db.String(250), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 
