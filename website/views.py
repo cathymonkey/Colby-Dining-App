@@ -1,4 +1,6 @@
-
+"""
+Filename: views.py
+"""
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for
 from flask import Blueprint, render_template, redirect, url_for
 from flask import request, current_app
@@ -79,8 +81,6 @@ def dining_experience():
 @main_blueprint.route('/team')
 def team():
     return render_template('team.html')
-
-
 
 
 @main_blueprint.route('/menu', methods=['GET'])

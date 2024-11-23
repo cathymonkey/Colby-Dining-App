@@ -1,3 +1,6 @@
+"""
+Filename: populate_db.py
+"""
 from app import app, db
 from models import db, WaitTime, Food, Tag
 from datetime import datetime, time, timedelta

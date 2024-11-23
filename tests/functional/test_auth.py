@@ -1,3 +1,6 @@
+"""
+Filename: test_auth.py
+"""
 import pytest
 from flask import url_for, session
 from flask_dance.consumer.storage import MemoryStorage

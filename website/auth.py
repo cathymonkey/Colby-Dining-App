@@ -1,3 +1,7 @@
+"""
+Filename: auth.py
+"""
+
 # from website import db
 from website.models import Student, Food, Tag, food_tags, FeedbackQuestion, Administrator
 

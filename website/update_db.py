@@ -1,3 +1,6 @@
+"""
+Filename: update_db.py
+"""
 from app import app, db
 from models import Administrator
 import traceback
