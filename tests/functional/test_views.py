@@ -40,7 +40,6 @@ def test_userdashboard(client):
     response = client.get('/userdashboard')
 
     assert response.status_code == 302
-    
 
 def test_admindashboard(client):
 
