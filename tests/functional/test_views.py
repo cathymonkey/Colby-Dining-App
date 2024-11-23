@@ -35,7 +35,7 @@ def test_contact(client):
 
 
 def test_userdashboard(client, current_user):
-    response = client.get('/user/dashboard')
+    response = client.get('/userdashboard')
 
     assert response.status_code == 200
     assert current_user.username != None
