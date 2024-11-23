@@ -1,3 +1,8 @@
+"""
+Filename: add_admin.py
+Run this file to add admin through terminal command
+python3 add_admin.py
+"""
 from website import create_app, db
 from website.models import Administrator
 from werkzeug.security import generate_password_hash
