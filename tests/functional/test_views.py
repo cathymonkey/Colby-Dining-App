@@ -56,22 +56,48 @@ def test_logout(client):
 
 
 def test_menu_page(client):
-    pass
+
+    response = client.get('/menu')
+    assert response.status_code == 200
+    assert b"Dana" in response.data
+    assert b"Vegetarian" in response.data
+
+
 
 def test_get_current_menu(client):
-    pass
+
+    response = client.get('/api/menu/current')
+    assert response.status_code == 200
+    assert b"status" in response.json
+    assert b"menus" in response.json
+
 
 def test_submit_feedback(client):
-    pass
 
+    feedback_data = {
+        'name': 'Test User',
+        'email': 'testuser@colby.edu',
+        'feedback_type': 'Positive',
+        'message': 'Great experience!'
+    }
+
+    response = client.post('/submit_feedback', data=feedback_data)
+    assert response.status_code == 200
+    assert b'Thank you for your feedback' in response.data
 
 def test_get_dining_hall_menu(client):
-    pass
+    response = client.get('/menu/Roberts')
+    assert response.status_code == 200
+    assert b"Roberts" in response.data
 
 
 # testing apis 
 def test_get_weekly_menu(client):
-    pass
+    response = client.get('/api/menu/weekly/Dana')
+    assert response.status_code == 200
+    assert 'weekly_menu' in response.json
 
 def test_get_dining_hours(client):
-    pass
+    response = client.get('/api/menu/hours')
+    assert response.status_code == 200
+    assert 'hours' in response.json
