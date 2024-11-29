@@ -1,0 +1,39 @@
+/* Ensure the body fills the viewport height */
+html, body {
+    height: 100%;
+}
+
+.container-xxl {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1; /* Fills remaining vertical space */
+}
+
+/* Card styling */
+.card {
+    min-height: 300px; /* Increase card height */
+}
+
+.card h5 {
+    font-size: 1.5rem;
+}
+
+.card p {
+    flex: 1; /* Expands to fill vertical space */
+}
+
+.card .btn {
+    margin-top: auto; /* Aligns "Read More" button to the bottom */
+}
+
+/* Footer styling */
+.footer {
+    background-color: #343a40;
+    color: white;
+    text-align: center;
+    padding: 1rem 0;
+}

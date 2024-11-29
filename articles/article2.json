@@ -1,0 +1,7 @@
+{
+    "id": 2,
+    "title": "JSON Article Two",
+    "preview": "This is a preview of the second JSON article.",
+    "content": "Full content of JSON Article Two goes here.",
+    "image": "../static/img/about-2.jpg"
+}
