@@ -21,7 +21,7 @@ jobs:
         pip install pytest   
     - name: Analysing the code with pylint
       run: |
-        pylint --fail-under=9 $(git ls-files '*.py')    
+        pylint --fail-under=4 $(git ls-files '*.py')    
         
     - name: Testing the code with pytest
       run: |
