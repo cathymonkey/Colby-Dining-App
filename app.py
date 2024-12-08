@@ -1,4 +1,5 @@
 from flask import Flask
+from scheduler import SchedulerService
 from models import db
 from flask_login import LoginManager
 from views import main_blueprint
@@ -9,6 +10,7 @@ from dotenv import load_dotenv
 import os
 import logging
 import sys
+y = SchedulerService()
 
 def create_app(test_config=None):
    # Load environment variables
@@ -16,6 +18,8 @@ def create_app(test_config=None):
    
    # Initialize Flask app
    app = Flask(__name__, static_folder='static')
+   with app.app_context():
+    y.init_app(app)
    
    # Configure logging
    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)

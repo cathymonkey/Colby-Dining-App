@@ -13,7 +13,7 @@ import os
 import logging
 from auth import admin_required
 from dining_predictor import DiningHallPredictor
-from models import db, FeedbackQuestion, Administrator
+from models import db, FeedbackQuestion, Administrator, FavoriteDish
 from email_utils import EmailSender
 from typing import Dict, List, Optional
 from menu_api import BonAppetitAPI
@@ -444,5 +444,61 @@ def get_dining_hours():
             'status': 'error',
             'message': 'Unable to fetch dining hours'
         }), 500
+    
+
+@main_blueprint.route('/api/favorites', methods=['POST', 'DELETE'])
+@login_required
+def manage_favorites():
+    try:
+        data = request.get_json()
+        dish_name = data.get('dish_name')
+        
+        if not dish_name:
+            return jsonify({'status': 'error', 'message': 'Dish name required'}), 400
+            
+        if request.method == 'POST':
+            favorite = FavoriteDish(
+                student_email=current_user.student_email,
+                dish_name=dish_name
+            )
+            db.session.add(favorite)
+            message = 'Dish added to favorites'
+        else:  # DELETE
+            favorite = FavoriteDish.query.filter_by(
+                student_email=current_user.student_email,
+                dish_name=dish_name
+            ).first()
+            
+            if not favorite:
+                return jsonify({'status': 'error', 'message': 'Favorite not found'}), 404
+                
+            db.session.delete(favorite)
+            message = 'Dish removed from favorites'
+            
+        db.session.commit()
+        return jsonify({'status': 'success', 'message': message})
+        
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': 'Dish already in favorites'}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@main_blueprint.route('/api/favorites', methods=['GET'])
+@login_required
+def get_favorites():
+    try:
+        favorites = FavoriteDish.query.filter_by(
+            student_email=current_user.student_email
+        ).order_by(FavoriteDish.created_at.desc()).all()
+        
+        return jsonify({
+            'status': 'success',
+            'favorites': [{'dish_name': f.dish_name} for f in favorites]
+        })
+        
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 

@@ -57,6 +57,15 @@ class Favorites(db.Model):
     student_email = db.Column(db.String(255), db.ForeignKey('student.student_email'), nullable = False)
     food_id = db.Column(db.Integer, db.ForeignKey('food.id'), nullable = False)
 
+class FavoriteDish(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_email = db.Column(db.String(255), db.ForeignKey('student.student_email'), nullable=False)
+    dish_name = db.Column(db.String(255), nullable=False)  # We'll use dish name as unique identifier
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Composite unique constraint to prevent duplicate favorites
+    __table_args__ = (db.UniqueConstraint('student_email', 'dish_name'),)
+
 class Administrator(db.Model, UserMixin):
     admin_email = db.Column(db.String(255), primary_key=True)
     password_hashed = db.Column(db.String(128), nullable=False)
