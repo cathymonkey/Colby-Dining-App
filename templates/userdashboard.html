@@ -233,6 +233,9 @@
                     <a href="#" class="btn btn-outline-primary" data-feedback-btn>
                         <i class="fas fa-comment-alt me-2"></i>Submit Feedback
                     </a>
+                    <a href="https://colby-sp.transactcampus.com/eaccounts/AnonymousHome.aspx" class="btn btn-outline-primary">
+                        <i class="fas fa-link me-2"></i>Transact
+                    </a>
                 </div>
             </div>
             
@@ -253,9 +256,9 @@
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="mb-0">Favorite Dishes</h5>
-                    <button class="btn btn-outline-primary btn-sm">
+                    <a href="{{ url_for('main.menu_page') }}" class="btn btn-outline-primary btn-sm">
                         <i class="fas fa-plus me-2"></i>Add More
-                    </button>
+                    </a>
                 </div>
                 <div id="favorites-container" class="row g-3">
                     <!-- Favorites will be populated here -->
