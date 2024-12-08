@@ -23,10 +23,6 @@ def add_admin(email, password):
             db.session.rollback()
             print(f"Error adding administrator: {str(e)}")
             return False
-        
-from app import create_app, db
-from models import Administrator
-from datetime import datetime
 
 def remove_admin(email):
     app = create_app()
@@ -56,16 +52,13 @@ if __name__ == "__main__":
     if not email.endswith('@colby.edu'):
         print("Error: Email must be a @colby.edu address")
         exit(1)
-        
-    # Add confirmation step to prevent accidental deletions
-    confirmation = input(f"Are you sure you want to remove admin {email}? (y/N): ")
+    confirmation = input(f"Are you sure you want to remove admin {email}? (y/n): ")
     if confirmation.lower() != 'y':
         print("Operation cancelled")
         exit(0)
         
     remove_admin(email)
 
-# if __name__ == "__main__":
     # email = input("Enter admin email (@colby.edu): ")
     # if not email.endswith('@colby.edu'):
     #     print("Error: Email must be a @colby.edu address")
