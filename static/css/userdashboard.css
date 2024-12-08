@@ -1,0 +1,360 @@
+/* Dashboard specific styles
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.quick-actions .btn {
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.quick-actions .btn::after {
+    content: '';
+    position: absolute;
+    left: -20%;
+    top: -50%;
+    width: 140%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: rotate(45deg);
+    transition: transform 0.3s ease;
+    z-index: -1;
+}
+
+.quick-actions .btn:hover::after {
+    transform: rotate(45deg) translate(100%, 100%);
+}
+
+/* Wait times card styles */
+/* .wait-time-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+.wait-time-low { background-color: #10B981; }
+.wait-time-medium { background-color: #F59E0B; }
+.wait-time-high { background-color: #EF4444; } */
+
+/* Favorite dishes card styles */
+/* .favorite-dish-card {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.favorite-dish-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+} */
+
+/* Modal styles */
+/* .modal-content {
+    border-radius: 0.5rem;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+} */
+
+/* Responsive adjustments */
+/* @media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+}  */
+
+:root {
+    --primary-blue: #002878;      /* Colby dark blue */
+    --secondary-blue: #1a365d;    /* Complementary navy */
+    --accent-blue: #3182ce;       /* Interactive elements */
+    --bg-dark: #1a202c;           /* Dark backgrounds */
+    --bg-light: #f7fafc;          /* Light backgrounds */
+    --text-dark: #2d3748;         /* Dark text */
+    --text-light: #ffffff;        /* Light text */
+    --success: #10B981;           /* Green for low wait times */
+    --warning: #F59E0B;           /* Yellow for medium wait times */
+    --danger: #EF4444;            /* Red for high wait times */
+    --border-color: #e2e8f0;      /* Subtle borders */
+}
+
+/* Welcome banner styles */
+.welcome-banner {
+    background: linear-gradient(to right, var(--primary-blue), var(--secondary-blue));
+    color: var(--text-light);
+    padding: 1.5rem 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Section headers */
+.section-title {
+    color: var(--text-dark);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+/* Quick Actions styles */
+.quick-actions a {
+    display: block;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: var(--bg-light);
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.quick-actions a:hover {
+    background: var(--accent-blue);
+    color: var(--text-light);
+    transform: translateX(5px);
+    border-color: var(--accent-blue);
+}
+
+/* Wait times styles */
+.wait-times-container {
+    background: var(--bg-light);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.dining-hall {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 6px;
+    background: white;
+    border: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.wait-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.wait-badge.low {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.wait-badge.medium {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.wait-badge.high {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+}
+
+/* View Menu button */
+.view-menu {
+    padding: 0.5rem 1rem;
+    background: var(--accent-blue);
+    color: var(--text-light);
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.view-menu:hover {
+    background: var(--primary-blue);
+}
+
+/* Card styles */
+.card {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Favorite dishes styles */
+.favorite-section {
+    margin-top: 2rem;
+}
+
+.favorites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.favorite-item {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.favorite-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.add-more {
+    background: var(--accent-blue);
+    color: var(--text-light);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.add-more:hover {
+    background: var(--primary-blue);
+}
+
+/* Last updated text */
+.last-updated {
+    color: var(--text-light);
+    opacity: 0.8;
+    font-size: 0.875rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .welcome-banner {
+        text-align: center;
+    }
+    
+    .favorites-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+}
+
+
+/* Grid layout for main content */
+.dashboard-content {
+    display: grid;
+    grid-template-columns: 300px 1fr;  /* Fixed width for Quick Actions, remaining space for Wait Times */
+    gap: 2rem;
+}
+
+/* Welcome banner styles */
+.welcome-banner {
+    background: var(--primary);
+    padding: 1.5rem 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Quick Actions section */
+.quick-actions {
+    width: 100%;
+}
+
+.quick-actions a {
+    display: block;
+    width: 100%;
+    padding: 0.875rem 1rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--primary);
+    border-radius: 6px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--primary);
+    transition: all 0.2s ease;
+}
+
+/* Wait Times section */
+.wait-times {
+    width: 100%;
+}
+
+.dining-hall {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dining-info {
+    flex: 1;
+}
+
+.dining-name {
+    font-size: 1.125rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.status-message {
+    color: #dc3545;  /* Red for unavailable message */
+    font-size: 0.875rem;
+}
+
+.action-button {
+    margin-left: 1rem;
+}
+
+/* Uniform button styling */
+.view-menu {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: var(--primary);
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    text-align: center;
+    min-width: 100px;
+}
+
+/* Section titles */
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .dashboard-content {
+        grid-template-columns: 1fr;  /* Stack sections on mobile */
+        gap: 1.5rem;
+    }
+
+    .welcome-banner {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .welcome-banner .last-updated {
+        margin-top: 0.5rem;
+    }
+}
+
+
+
