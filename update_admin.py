@@ -48,22 +48,22 @@ def remove_admin(email):
             return False
 
 if __name__ == "__main__":
-    email = input("Enter admin email to remove (@colby.edu): ")
-    if not email.endswith('@colby.edu'):
-        print("Error: Email must be a @colby.edu address")
-        exit(1)
-    confirmation = input(f"Are you sure you want to remove admin {email}? (y/n): ")
-    if confirmation.lower() != 'y':
-        print("Operation cancelled")
-        exit(0)
-        
-    remove_admin(email)
-
-    # email = input("Enter admin email (@colby.edu): ")
+    # email = input("Enter admin email to remove (@colby.edu): ")
     # if not email.endswith('@colby.edu'):
     #     print("Error: Email must be a @colby.edu address")
     #     exit(1)
+    # confirmation = input(f"Are you sure you want to remove admin {email}? (y/n): ")
+    # if confirmation.lower() != 'y':
+    #     print("Operation cancelled")
+    #     exit(0)
         
-    # password = input("Enter admin password: ")
-    # add_admin(email, password)
+    # remove_admin(email)
+
+    email = input("Enter admin email (@colby.edu): ")
+    if not email.endswith('@colby.edu'):
+        print("Error: Email must be a @colby.edu address")
+        exit(1)
+        
+    password = input("Enter admin password: ")
+    add_admin(email, password)
 
