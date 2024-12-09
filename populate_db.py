@@ -182,7 +182,8 @@ def generate_feedabck():
     print("Feedback populated successfully!")
 
 with app.app_context():
+    db.drop_all
     db.create_all()
-    generate_wait_times() 
-    generate_foods_and_tags()
+    # generate_wait_times() 
+    # generate_foods_and_tags()
     generate_feedabck()
