@@ -14,19 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeDashboard() {
-    // Fetch wait times data
-    fetch('/api/wait-times')
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                updateWaitingTimes(data.predictions);
-                updateLastRefreshed();
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching wait times:', error);
-            showToast('Error', 'Failed to load wait times', 'error');
-        });
 
     // Fetch feedback questions
     fetch('/api/admin/feedback-questions')
@@ -42,32 +29,6 @@ function initializeDashboard() {
             console.error('Error fetching feedback questions:', error);
             showToast('Error', 'Failed to load feedback questions', 'error');
         });
-}
-
-function updateLastRefreshed() {
-    const now = new Date();
-    document.getElementById('last-updated').textContent = 
-        `Last updated: ${now.toLocaleTimeString()}`;
-}
-
-function updateWaitingTimes(predictions) {
-    Object.entries(predictions).forEach(([location, data]) => {
-        const element = document.querySelector(`.waiting-time[data-location="${location}"]`);
-        if (element) {
-            if (data.status === 'success') {
-                element.textContent = `${Math.round(data.wait_time)} min`;
-                
-                // Update status classes
-                element.classList.remove('status-low', 'status-medium', 'status-high');
-                if (data.wait_time < 5) element.classList.add('status-low');
-                else if (data.wait_time < 15) element.classList.add('status-medium');
-                else element.classList.add('status-high');
-            } else {
-                element.textContent = data.message || 'N/A';
-                element.classList.remove('status-low', 'status-medium', 'status-high');
-            }
-        }
-    });
 }
 
 function updateFeedbackQuestions(questions) {
