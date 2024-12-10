@@ -131,13 +131,15 @@ function updateFeedbackQuestions(questions) {
 
         const deleteButton = document.createElement('button');
         deleteButton.classList.add('btn', 'btn-outline-danger');
-        deleteButton.innerHTML = '<i class="fas fa-trash"></i>';  // Original icon for deletion
+        
         
         // Check if the question is active
         if (question.is_active) {
+            deleteButton.innerHTML = '<i class="fas fa-ban"></i>';  
             deleteButton.title = 'Deactivate Question';
             deleteButton.onclick = () => deactivateQuestion(question.id);
-        } else {            
+        } else {    
+            deleteButton.innerHTML = '<i class="fas fa-trash"></i>';          
             deleteButton.title = 'Delete Question';
             deleteButton.onclick = () => deleteQuestion(question.id);
         }
