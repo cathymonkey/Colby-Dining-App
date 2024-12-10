@@ -136,7 +136,8 @@ def create_feedback_question():
     except Exception as e:
         db.session.rollback()
         return jsonify({'status': 'error', 'message': str(e)}), 400
-    
+
+
 @main_blueprint.route('/admin/feedback-question/<int:question_id>/deactivate', methods=['PUT'])
 @login_required
 @admin_required
@@ -144,18 +145,21 @@ def deactivate_feedback_question(question_id):
     try:
         question = FeedbackQuestion.query.get_or_404(question_id)
         
+        # Ensure the user has permission to deactivate the question
         if question.administrator_id != current_user.admin_email:
             return jsonify({'status': 'error', 'message': 'Unauthorized to deactivate this question'}), 403
 
-        # Set is_active to False
-        question.is_active = False
-        db.session.commit()
-        
-        return jsonify({'status': 'success', 'message': 'Question deactivated successfully'})
+        # Deactivate the question if it is active
+        if question.is_active:
+            question.is_active = False
+            db.session.commit()
+            return jsonify({'status': 'success', 'message': 'Question deactivated successfully'})
+        else:
+            return jsonify({'status': 'error', 'message': 'Question is already deactivated'}), 400
+
     except Exception as e:
         db.session.rollback()
         return jsonify({'status': 'error', 'message': str(e)}), 400
-
 
 @main_blueprint.route('/admin/feedback-question/<int:question_id>', methods=['DELETE'])
 @login_required
@@ -163,15 +167,23 @@ def deactivate_feedback_question(question_id):
 def delete_feedback_question(question_id):
     try:
         question = FeedbackQuestion.query.get_or_404(question_id)
+
+        # Ensure the user has permission to delete the question
         if question.administrator_id != current_user.admin_email:
             return jsonify({'status': 'error', 'message': 'Unauthorized to delete this question'}), 403
-        
-        db.session.delete(question)
-        db.session.commit()
-        return jsonify({'status': 'success', 'message': 'Question deleted successfully'})
+
+        # Only delete the question if it is already deactivated (inactive)
+        if not question.is_active:
+            db.session.delete(question)
+            db.session.commit()
+            return jsonify({'status': 'success', 'message': 'Question deleted successfully'})
+        else:
+            return jsonify({'status': 'error', 'message': 'Cannot delete an active question'}), 400
+
     except Exception as e:
         db.session.rollback()
         return jsonify({'status': 'error', 'message': str(e)}), 400
+
 
 @main_blueprint.route('/api/admin/feedback-questions', methods=['GET'])
 def get_feedback_questions():

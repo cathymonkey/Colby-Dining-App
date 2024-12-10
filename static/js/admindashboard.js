@@ -110,23 +110,37 @@ function updateFeedbackQuestions(questions) {
         const actionButtons = document.createElement('div');
         actionButtons.classList.add('btn-group', 'btn-group-sm');
 
-        const editButton = document.createElement('button');
-        editButton.classList.add('btn', 'btn-outline-primary');
-        editButton.innerHTML = '<i class="fas fa-edit"></i>';
-        editButton.title = 'Edit Question';
+        // Only create the Edit button if the question is active
+        if (question.is_active) {
+            const editButton = document.createElement('button');
+            editButton.classList.add('btn', 'btn-outline-primary');
+            editButton.innerHTML = '<i class="fas fa-edit"></i>';
+            editButton.title = 'Edit Question';
+            actionButtons.appendChild(editButton);
+            
+            // Add event listener for edit
+            editButton.addEventListener('click', () => editQuestion(question));
+        }
 
         const deleteButton = document.createElement('button');
         deleteButton.classList.add('btn', 'btn-outline-danger');
-        deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
-        deleteButton.title = 'Delete Question';
-        deleteButton.onclick = () => deleteQuestion(question.id); // Changed to onclick
+        deleteButton.innerHTML = '<i class="fas fa-trash"></i>';  // Original icon for deletion
+        
+        // Check if the question is active
+        if (question.is_active) {
+            deleteButton.title = 'Deactivate Question';
+            deleteButton.onclick = () => deactivateQuestion(question.id);
+        } else {            
+            deleteButton.title = 'Delete Question';
+            deleteButton.onclick = () => deleteQuestion(question.id);
+        }
+        
 
         const viewResponsesButton = document.createElement('button');
         viewResponsesButton.classList.add('btn', 'btn-outline-info');
         viewResponsesButton.innerHTML = '<i class="fas fa-chart-pie"></i>';
         viewResponsesButton.title = 'View Responses';
 
-        actionButtons.appendChild(editButton);
         actionButtons.appendChild(deleteButton);
         actionButtons.appendChild(viewResponsesButton)
 
@@ -136,23 +150,51 @@ function updateFeedbackQuestions(questions) {
         if (question.is_active) {
             feedbackList.appendChild(questionItem); // Append to active feedback
         } else {
-            const inactiveLabel = document.createElement('span');
-            inactiveLabel.classList.add('inactive-label');
-            inactiveLabel.textContent = 'Deactivated';
-            questionText.appendChild(inactiveLabel);
+            questionItem.classList.add('inactive');
             pastFeedbackList.appendChild(questionItem); // Append to past feedback
         }
 
-        // Add event listener for edit
-        editButton.addEventListener('click', () => editQuestion(question));
+        
         // Add event listener for view response
         viewResponsesButton.addEventListener('click', () => loadResponses(question.id, question.question_type));
     });
         
 }
 
+// Deactivate question
+function deactivateQuestion(questionId) {
+    if (!confirm('Are you sure you want to deactivate this question?')) {
+        return;
+    }
+
+    console.log('Deactivating question:', questionId); // Debug log
+
+    fetch(`/admin/feedback-question/${questionId}/deactivate`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        return response.json();
+    })
+    .then(data => {
+        if (data.status === 'success') {
+            showToast('Success', 'Question deactivated successfully', 'success');
+            initializeDashboard(); // Refresh the questions list
+        } else {
+            throw new Error(data.message || 'Failed to deactivate question');
+        }
+    })
+    .catch(error => {
+        console.error('Error deactivating question:', error);
+        showToast('Error', 'Failed to deactivate question: ' + error.message, 'error');
+    });
+}
+
+// Delete question
 function deleteQuestion(questionId) {
-    if (!confirm('Are you sure you want to delete this question?')) {
+    if (!confirm('Are you sure you want to permanently delete this question?')) {
         return;
     }
 
@@ -162,14 +204,12 @@ function deleteQuestion(questionId) {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
-        }
+        },
     })
     .then(response => {
-        console.log('Delete response status:', response.status); // Debug log
         return response.json();
     })
     .then(data => {
-        console.log('Delete response data:', data); // Debug log
         if (data.status === 'success') {
             showToast('Success', 'Question deleted successfully', 'success');
             initializeDashboard(); // Refresh the questions list
@@ -182,6 +222,7 @@ function deleteQuestion(questionId) {
         showToast('Error', 'Failed to delete question: ' + error.message, 'error');
     });
 }
+
 
 function editQuestion(question) {
     // Placeholder for edit functionality
