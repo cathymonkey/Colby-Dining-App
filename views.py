@@ -136,6 +136,26 @@ def create_feedback_question():
     except Exception as e:
         db.session.rollback()
         return jsonify({'status': 'error', 'message': str(e)}), 400
+    
+@main_blueprint.route('/admin/feedback-question/<int:question_id>/deactivate', methods=['PUT'])
+@login_required
+@admin_required
+def deactivate_feedback_question(question_id):
+    try:
+        question = FeedbackQuestion.query.get_or_404(question_id)
+        
+        if question.administrator_id != current_user.admin_email:
+            return jsonify({'status': 'error', 'message': 'Unauthorized to deactivate this question'}), 403
+
+        # Set is_active to False
+        question.is_active = False
+        db.session.commit()
+        
+        return jsonify({'status': 'success', 'message': 'Question deactivated successfully'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': str(e)}), 400
+
 
 @main_blueprint.route('/admin/feedback-question/<int:question_id>', methods=['DELETE'])
 @login_required
@@ -165,7 +185,9 @@ def get_feedback_questions():
                 'question_type': q.question_type,
                 'active_start_date': q.active_start_date.isoformat(),
                 'active_end_date': q.active_end_date.isoformat(),
-                'created_at': q.created_at.isoformat() if q.created_at else None
+                'created_at': q.created_at.isoformat() if q.created_at else None,
+                'is_active': q.is_active,
+                'administrator_id': q.administrator_id
             } for q in questions]
         })
     except Exception as e:

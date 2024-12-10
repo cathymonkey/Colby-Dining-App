@@ -126,6 +126,16 @@ body {
     background-color: #f1f3f5;
 }
 
+.inactive-label {
+    font-size: 0.8rem;
+    color: #999;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    padding: 2px 5px;
+    margin-left: 10px;
+}
+
+
 /* Modal Styles */
 .modal-content {
     border: none;

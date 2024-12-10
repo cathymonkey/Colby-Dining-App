@@ -74,6 +74,9 @@ function updateFeedbackQuestions(questions) {
     const feedbackList = document.getElementById('feedbackList');
     feedbackList.innerHTML = ''; // Clear existing content
 
+    const pastFeedbackList = document.querySelector('#pastFeedback .list-group');
+    pastFeedbackList.innerHTML = '';
+
     if (questions.length === 0) {
         const emptyState = document.createElement('div');
         emptyState.classList.add('text-center', 'p-4', 'text-muted');
@@ -129,7 +132,16 @@ function updateFeedbackQuestions(questions) {
 
         questionItem.appendChild(questionContent);
         questionItem.appendChild(actionButtons);
-        feedbackList.appendChild(questionItem);
+        
+        if (question.is_active) {
+            feedbackList.appendChild(questionItem); // Append to active feedback
+        } else {
+            const inactiveLabel = document.createElement('span');
+            inactiveLabel.classList.add('inactive-label');
+            inactiveLabel.textContent = 'Deactivated';
+            questionText.appendChild(inactiveLabel);
+            pastFeedbackList.appendChild(questionItem); // Append to past feedback
+        }
 
         // Add event listener for edit
         editButton.addEventListener('click', () => editQuestion(question));
