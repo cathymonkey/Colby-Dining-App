@@ -120,6 +120,13 @@ function updateFeedbackQuestions(questions) {
             
             // Add event listener for edit
             editButton.addEventListener('click', () => editQuestion(question));
+        } else {
+            const reactivateButton = document.createElement('button');
+            reactivateButton.classList.add('btn', 'btn-outline-success');
+            reactivateButton.innerHTML = '<i class="fas fa-sync-alt"></i>'; 
+            reactivateButton.title = 'Reactivate Question'
+            actionButtons.appendChild(reactivateButton)
+            reactivateButton.onclick = () => reactivateQuestion(question.id);
         }
 
         const deleteButton = document.createElement('button');
@@ -200,7 +207,7 @@ function deleteQuestion(questionId) {
 
     console.log('Deleting question:', questionId); // Debug log
 
-    fetch(`/admin/feedback-question/${questionId}`, {
+    fetch(`/admin/feedback-question/${questionId}/delete`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -222,6 +229,65 @@ function deleteQuestion(questionId) {
         showToast('Error', 'Failed to delete question: ' + error.message, 'error');
     });
 }
+
+// Function to reactivate a question
+function reactivateQuestion(questionId) {
+    fetch(`/admin/feedback-question/${questionId}`)
+        .then(response => response.json())
+        .then(data => {
+            const question = data.question;
+            
+            // Check if the question is valid and has an active_end_date
+            if (!question || !question.active_end_date) {
+                alert('Question data is not available or incomplete.');
+                return;
+            }
+
+            // Get today's date and the active_end_date from the response
+            const today = new Date();
+            const endDate = new Date(question.active_end_date);
+
+            // Check if the active_end_date is beyond today
+            if (endDate <= today) {
+                alert("The active period for this question has ended, and it cannot be reactivated.");
+                return;
+            }
+
+            // Show confirmation to the user
+            if (!confirm('Are you sure you want to reactivate this question?')) {
+                return;
+            }
+
+            console.log('Reactivating question:', questionId);  // Debug log
+
+            // Send a PUT request to the backend to reactivate the question
+            fetch(`/admin/feedback-question/${questionId}/reactivate`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Reactivate response data:', data);  // Debug log
+                if (data.status === 'success') {
+                    showToast('Success', 'Question reactivated successfully', 'success');
+                    initializeDashboard();  // Refresh the question list
+                } else {
+                    throw new Error(data.message || 'Failed to reactivate question');
+                }
+            })
+            .catch(error => {
+                console.error('Error reactivating question:', error);
+                showToast('Error', 'Failed to reactivate question: ' + error.message, 'error');
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching question data:', error);
+            showToast('Error', 'Failed to fetch question data: ' + error.message, 'error');
+        });
+}
+
 
 
 function editQuestion(question) {

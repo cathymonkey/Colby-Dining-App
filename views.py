@@ -161,7 +161,7 @@ def deactivate_feedback_question(question_id):
         db.session.rollback()
         return jsonify({'status': 'error', 'message': str(e)}), 400
 
-@main_blueprint.route('/admin/feedback-question/<int:question_id>', methods=['DELETE'])
+@main_blueprint.route('/admin/feedback-question/<int:question_id>/delete', methods=['DELETE'])
 @login_required
 @admin_required
 def delete_feedback_question(question_id):
@@ -183,7 +183,51 @@ def delete_feedback_question(question_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'status': 'error', 'message': str(e)}), 400
+    
+@main_blueprint.route('/admin/feedback-question/<int:question_id>/reactivate', methods=['PUT'])
+@login_required
+@admin_required
+def reactivate_feedback_question(question_id):
+    try:
+        question = FeedbackQuestion.query.get_or_404(question_id)
+        
+        # Check if the current user is the administrator who created the question
+        if question.administrator_id != current_user.admin_email:
+            return jsonify({'status': 'error', 'message': 'Unauthorized to reactivate this question'}), 403
 
+        # Reactivate the question
+        question.is_active = True
+        db.session.commit()
+
+        return jsonify({'status': 'success', 'message': 'Question reactivated successfully'})
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': str(e)}), 400
+
+
+@main_blueprint.route('/admin/feedback-question/<int:question_id>', methods=['GET'])
+def get_feedback_question(question_id):
+    try:
+        # Fetch the question by ID
+        question = FeedbackQuestion.query.get_or_404(question_id)
+        
+        # Return the question details in the response
+        return jsonify({
+            'status': 'success',
+            'question': {
+                'id': question.id,
+                'question_text': question.question_text,
+                'question_type': question.question_type,
+                'active_start_date': question.active_start_date.isoformat(),
+                'active_end_date': question.active_end_date.isoformat(),
+                'created_at': question.created_at.isoformat() if question.created_at else None,
+                'is_active': question.is_active,
+                'administrator_id': question.administrator_id
+            }
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @main_blueprint.route('/api/admin/feedback-questions', methods=['GET'])
 def get_feedback_questions():
