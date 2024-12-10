@@ -17,6 +17,7 @@ from models import db, FeedbackQuestion, Administrator, FavoriteDish, SurveyLink
 from email_utils import EmailSender
 from typing import Dict, List, Optional
 from menu_api import BonAppetitAPI
+from utils import deactivate_expired_questions
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -231,6 +232,8 @@ def get_feedback_question(question_id):
 
 @main_blueprint.route('/api/admin/feedback-questions', methods=['GET'])
 def get_feedback_questions():
+    deactivate_expired_questions()
+
     try:
         questions = FeedbackQuestion.query.order_by(FeedbackQuestion.created_at.desc()).all()
         return jsonify({
