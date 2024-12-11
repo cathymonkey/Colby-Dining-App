@@ -1,13 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Page loaded. Setting up feedback popup.");
-    setTimeout(showFeedbackPopup, 5000); // Show popup after 5 seconds
+    setTimeout(showFeedbackPopup, 3000);
 });
 
 async function showFeedbackPopup() {
     console.log("Attempting to fetch feedback question...");
 
     try {
-        // Fetch the earliest active feedback question
         const response = await fetch('/api/feedback/check-for-popup');
 
         console.log("Response from server:", response);
@@ -27,7 +26,6 @@ async function showFeedbackPopup() {
             const questionText = document.getElementById("popup-question-text");
             const optionsContainer = document.getElementById("popup-options");
 
-            // Populate popup with question data
             questionText.textContent = data.question_text;
             optionsContainer.innerHTML = "";
 
@@ -51,9 +49,12 @@ async function showFeedbackPopup() {
 
             popup.style.display = "flex";
 
-            // Handle submission
             document.getElementById("submit-feedback").onclick = async () => {
-                const userId = 1; // Replace with actual user ID logic
+
+
+                const userId = 1;
+
+
                 let content = null;
 
                 if (data.question_type === "yes_no") {
@@ -99,7 +100,6 @@ async function showFeedbackPopup() {
                 }
             };
 
-            // Button selection logic
             optionsContainer.addEventListener("click", (e) => {
                 if (e.target.tagName === "BUTTON") {
                     optionsContainer.querySelectorAll("button").forEach((btn) => btn.classList.remove("selected"));

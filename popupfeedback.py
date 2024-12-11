@@ -2,6 +2,14 @@ from flask import Blueprint, request, jsonify
 from datetime import datetime
 from models import db, FeedbackQuestion, YesNoResponse, RatingResponse, ShortAnswerResponse
 import logging
+import google.generativeai as genai
+
+genai.configure(api_key="AIzaSyCKBBfHkuxEw4AyXWZFlmNGbahC_okDmbg")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+# response = model.generate_content("Explain how AI works")
+# print(response.text)
+
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -12,7 +20,6 @@ popup_feedback_bp = Blueprint('popup_feedback', __name__)
 def handle_popup_feedback():
     data = request.get_json()
 
-    # Validate input
     question_id = data.get('question_id')
     question_type = data.get('question_type')
     user_id = data.get('user_id')
@@ -24,11 +31,9 @@ def handle_popup_feedback():
     if not question:
         return jsonify({'error': 'Question not found'}), 404
 
-    # Ensure the question type matches
     if question.question_type != question_type:
         return jsonify({'error': 'Question type mismatch'}), 400
 
-    # Save feedback based on type
     if question_type == 'yes_no':
         response = YesNoResponse(
             feedback_id=question_id,
@@ -44,11 +49,16 @@ def handle_popup_feedback():
             rating=data.get('rating')
         )
     elif question_type == 'short_answer':
+
+        user_answer = data.get('answer_text')
+
+        gemini_response = model.generate_content("This is a feedback response submitted by a user, if it is clearly not a valid feedback for dining service or is rude, output rude_or_irrelevant, else ouput the answer as it is, user answer: " + user_answer)
+
         response = ShortAnswerResponse(
             feedback_id=question_id,
             user_id=user_id,
             content=data.get('answer_text'),
-            answer_text=data.get('answer_text')
+            answer_text=gemini_response
         )
     else:
         return jsonify({'error': 'Unknown question type'}), 400
@@ -75,7 +85,7 @@ def check_for_popup():
 
     # earliest_question = active_questions[0]
 
-    earliest_question = FeedbackQuestion.query.offset(3).limit(1).first()
+    earliest_question = FeedbackQuestion.query.offset(0).limit(1).first()
 
     logging.debug(f"Triggering popup for question ID {earliest_question.id}, Text: {earliest_question.question_text}")
     return jsonify({
