@@ -14,19 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeDashboard() {
-    // Fetch wait times data
-    fetch('/api/wait-times')
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                updateWaitingTimes(data.predictions);
-                updateLastRefreshed();
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching wait times:', error);
-            showToast('Error', 'Failed to load wait times', 'error');
-        });
 
     // Fetch feedback questions
     fetch('/api/admin/feedback-questions')
@@ -44,35 +31,12 @@ function initializeDashboard() {
         });
 }
 
-function updateLastRefreshed() {
-    const now = new Date();
-    document.getElementById('last-updated').textContent = 
-        `Last updated: ${now.toLocaleTimeString()}`;
-}
-
-function updateWaitingTimes(predictions) {
-    Object.entries(predictions).forEach(([location, data]) => {
-        const element = document.querySelector(`.waiting-time[data-location="${location}"]`);
-        if (element) {
-            if (data.status === 'success') {
-                element.textContent = `${Math.round(data.wait_time)} min`;
-                
-                // Update status classes
-                element.classList.remove('status-low', 'status-medium', 'status-high');
-                if (data.wait_time < 5) element.classList.add('status-low');
-                else if (data.wait_time < 15) element.classList.add('status-medium');
-                else element.classList.add('status-high');
-            } else {
-                element.textContent = data.message || 'N/A';
-                element.classList.remove('status-low', 'status-medium', 'status-high');
-            }
-        }
-    });
-}
-
 function updateFeedbackQuestions(questions) {
     const feedbackList = document.getElementById('feedbackList');
     feedbackList.innerHTML = ''; // Clear existing content
+
+    const pastFeedbackList = document.querySelector('#pastFeedback .list-group');
+    pastFeedbackList.innerHTML = '';
 
     if (questions.length === 0) {
         const emptyState = document.createElement('div');
@@ -107,23 +71,47 @@ function updateFeedbackQuestions(questions) {
         const actionButtons = document.createElement('div');
         actionButtons.classList.add('btn-group', 'btn-group-sm');
 
-        const editButton = document.createElement('button');
-        editButton.classList.add('btn', 'btn-outline-primary');
-        editButton.innerHTML = '<i class="fas fa-edit"></i>';
-        editButton.title = 'Edit Question';
+        // Only create the Edit button if the question is active
+        if (question.is_active) {
+            const editButton = document.createElement('button');
+            editButton.classList.add('btn', 'btn-outline-primary');
+            editButton.innerHTML = '<i class="fas fa-edit"></i>';
+            editButton.title = 'Edit Question';
+            actionButtons.appendChild(editButton);
+            
+            // Add event listener for edit
+            editButton.addEventListener('click', () => editQuestion(question));
+        } else {
+            const reactivateButton = document.createElement('button');
+            reactivateButton.classList.add('btn', 'btn-outline-success');
+            reactivateButton.innerHTML = '<i class="fas fa-sync-alt"></i>'; 
+            reactivateButton.title = 'Reactivate Question'
+            actionButtons.appendChild(reactivateButton)
+            reactivateButton.onclick = () => reactivateQuestion(question.id);
+        }
 
         const deleteButton = document.createElement('button');
         deleteButton.classList.add('btn', 'btn-outline-danger');
-        deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
-        deleteButton.title = 'Delete Question';
-        deleteButton.onclick = () => deleteQuestion(question.id); // Changed to onclick
+        
+        
+        // Check if the question is active
+        if (question.is_active) {
+            deleteButton.innerHTML = '<i class="fas fa-ban"></i>';  
+            deleteButton.title = 'Deactivate Question';
+            deleteButton.onclick = () => deactivateQuestion(question.id);
+        } else {    
+            deleteButton.innerHTML = '<i class="fas fa-trash"></i>';          
+            deleteButton.title = 'Delete Question';
+            deleteButton.onclick = () => deleteQuestion(question.id);
+        }
+        
 
         const viewResponsesButton = document.createElement('button');
         viewResponsesButton.classList.add('btn', 'btn-outline-info');
         viewResponsesButton.innerHTML = '<i class="fas fa-chart-pie"></i>';
         viewResponsesButton.title = 'View Responses';
 
-        const ExportButton = document.createElement('button')
+        const ExportButton = document.createElement('button');
         ExportButton.classList.add('btn', 'btn-outline-success');
         ExportButton.innerHTML = '<i class="fas fa-file-export"></i>';
         ExportButton.title = 'Export Question';
@@ -135,10 +123,15 @@ function updateFeedbackQuestions(questions) {
 
         questionItem.appendChild(questionContent);
         questionItem.appendChild(actionButtons);
-        feedbackList.appendChild(questionItem);
+        
+        if (question.is_active) {
+            feedbackList.appendChild(questionItem); // Append to active feedback
+        } else {
+            questionItem.classList.add('inactive');
+            pastFeedbackList.appendChild(questionItem); // Append to past feedback
+        }
 
-        // Add event listener for edit
-        editButton.addEventListener('click', () => editQuestion(question));
+        
         // Add event listener for view response
         viewResponsesButton.addEventListener('click', () => loadResponses(question.id, question.question_type));
         // Add even listener for export 
@@ -149,25 +142,55 @@ function updateFeedbackQuestions(questions) {
         
 }
 
+// Deactivate question
+function deactivateQuestion(questionId) {
+    if (!confirm('Are you sure you want to deactivate this question?')) {
+        return;
+    }
+
+    console.log('Deactivating question:', questionId); // Debug log
+
+    fetch(`/admin/feedback-question/${questionId}/deactivate`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        return response.json();
+    })
+    .then(data => {
+        if (data.status === 'success') {
+            showToast('Success', 'Question deactivated successfully', 'success');
+            initializeDashboard(); // Refresh the questions list
+        } else {
+            throw new Error(data.message || 'Failed to deactivate question');
+        }
+    })
+    .catch(error => {
+        console.error('Error deactivating question:', error);
+        showToast('Error', 'Failed to deactivate question: ' + error.message, 'error');
+    });
+}
+
+// Delete question
 function deleteQuestion(questionId) {
-    if (!confirm('Are you sure you want to delete this question?')) {
+    if (!confirm('Are you sure you want to permanently delete this question?')) {
         return;
     }
 
     console.log('Deleting question:', questionId); // Debug log
 
-    fetch(`/admin/feedback-question/${questionId}`, {
+    fetch(`/admin/feedback-question/${questionId}/delete`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
-        }
+        },
     })
     .then(response => {
-        console.log('Delete response status:', response.status); // Debug log
         return response.json();
     })
     .then(data => {
-        console.log('Delete response data:', data); // Debug log
         if (data.status === 'success') {
             showToast('Success', 'Question deleted successfully', 'success');
             initializeDashboard(); // Refresh the questions list
@@ -180,6 +203,66 @@ function deleteQuestion(questionId) {
         showToast('Error', 'Failed to delete question: ' + error.message, 'error');
     });
 }
+
+// Function to reactivate a question
+function reactivateQuestion(questionId) {
+    fetch(`/admin/feedback-question/${questionId}`)
+        .then(response => response.json())
+        .then(data => {
+            const question = data.question;
+            
+            // Check if the question is valid and has an active_end_date
+            if (!question || !question.active_end_date) {
+                alert('Question data is not available or incomplete.');
+                return;
+            }
+
+            // Get today's date and the active_end_date from the response
+            const today = new Date();
+            const endDate = new Date(question.active_end_date);
+
+            // Check if the active_end_date is beyond today
+            if (endDate <= today) {
+                alert("The active period for this question has ended, and it cannot be reactivated.");
+                return;
+            }
+
+            // Show confirmation to the user
+            if (!confirm('Are you sure you want to reactivate this question?')) {
+                return;
+            }
+
+            console.log('Reactivating question:', questionId);  // Debug log
+
+            // Send a PUT request to the backend to reactivate the question
+            fetch(`/admin/feedback-question/${questionId}/reactivate`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Reactivate response data:', data);  // Debug log
+                if (data.status === 'success') {
+                    showToast('Success', 'Question reactivated successfully', 'success');
+                    initializeDashboard();  // Refresh the question list
+                } else {
+                    throw new Error(data.message || 'Failed to reactivate question');
+                }
+            })
+            .catch(error => {
+                console.error('Error reactivating question:', error);
+                showToast('Error', 'Failed to reactivate question: ' + error.message, 'error');
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching question data:', error);
+            showToast('Error', 'Failed to fetch question data: ' + error.message, 'error');
+        });
+}
+
+
 
 function editQuestion(question) {
     // Placeholder for edit functionality

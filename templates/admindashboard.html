@@ -71,36 +71,8 @@
     </div>
     <!-- Navbar & Hero End -->
 
-    <!-- Main Content Start -->
-    <div class="container-fluid py-5 px-4 px-lg-5">
-        <!-- Header Row with Last Updated -->
-        <div class="row mb-4">
-            <div class="col-12 d-flex justify-content-end">
-                <span class="text-muted" id="last-updated">
-                    <i class="fas fa-sync-alt me-2"></i>Last updated: --:--
-                </span>
-            </div>
-        </div>
-
-        <!-- Dining Hall Stats -->
-        <div class="row g-4 mb-5">
-            {% for location in ['Dana', 'Roberts', 'Foss'] %}
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm rounded-3">
-                    <div class="card-body text-center p-4">
-                        <h5 class="card-title text-primary mb-3">{{ location }}</h5>
-                        <div class="waiting-time mb-2" data-location="{{ location }}">--</div>
-                        <p class="text-muted mb-3">Current Wait Time</p>
-                        <div class="d-flex justify-content-center">
-                            <span class="badge bg-light text-dark px-3 py-2" id="{{ location.lower() }}-status">
-                                <i class="fas fa-users me-2"></i>Monitoring Traffic
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+    <div class="container-xxl bg-white px-4 py-4">
+        <div class="container py-2">
 
         <!-- Main Chart -->
         <div class="row mb-5">
@@ -173,12 +145,27 @@
                         <div id="feedbackList" class="list-group">
                             <!-- Feedback items populated by JavaScript -->
                         </div>
+
+                         <!-- Collapsible Past Feedback Section -->
+                        <div>
+                            <button class="btn btn-link text-decoration-none" data-bs-toggle="collapse" data-bs-target="#pastFeedback" aria-expanded="false" aria-controls="pastFeedback">
+                                <i class="fas fa-chevron-down me-2"></i>View Inactive Feedback
+                            </button>
+                            
+                            <div id="pastFeedback" class="collapse mt-3">
+                                <div class="list-group">                                    
+                                    <!-- More feedback items can be dynamically added via JavaScript -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <!-- Main Content End -->
+    </div>
+</div>
 
     <!-- Feedback Modal Start-->
     <div class="modal fade" id="feedbackModal" tabindex="-1">
