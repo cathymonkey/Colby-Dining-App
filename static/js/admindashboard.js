@@ -123,9 +123,15 @@ function updateFeedbackQuestions(questions) {
         viewResponsesButton.innerHTML = '<i class="fas fa-chart-pie"></i>';
         viewResponsesButton.title = 'View Responses';
 
+        const ExportButton = document.createElement('button')
+        ExportButton.classList.add('btn', 'btn-outline-success');
+        ExportButton.innerHTML = '<i class="fas fa-file-export"></i>';
+        ExportButton.title = 'Export Question';
+
         actionButtons.appendChild(editButton);
         actionButtons.appendChild(deleteButton);
-        actionButtons.appendChild(viewResponsesButton)
+        actionButtons.appendChild(viewResponsesButton);
+        actionButtons.appendChild(ExportButton);
 
         questionItem.appendChild(questionContent);
         questionItem.appendChild(actionButtons);
@@ -135,6 +141,10 @@ function updateFeedbackQuestions(questions) {
         editButton.addEventListener('click', () => editQuestion(question));
         // Add event listener for view response
         viewResponsesButton.addEventListener('click', () => loadResponses(question.id, question.question_type));
+        // Add even listener for export 
+        ExportButton.addEventListener('click', () => exportQuestion(question.id));
+
+        
     });
         
 }
@@ -442,4 +452,85 @@ function deleteSurveyLink(id) {
         console.error('Error:', error);
         showToast('Error', error.message, 'error');
     });
+}
+function exportQuestion(questionId) {
+    console.log('Exporting question:', questionId); // Debug log
+
+    if (!questionId) {
+        showToast('Error', 'Invalid question ID', 'error');
+        return;
+    }
+
+    fetch(`/admin/feedback-question/export/${questionId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        response.json()
+        // console.log('Export response status:', response.status);
+        // const contentType = response.headers.get('Content-Type');
+        // if (!contentType || !contentType.includes('application/json')) {
+        //     throw new Error(`Unexpected content type: ${contentType}`);
+        // }
+        // return response.json();
+    })
+    .then(data => {
+        console.log('Export response data:', data);
+        if (data.status === 'success') {
+            const csvContent = convertToCSV(data);
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `question_${questionId}_export.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Success', 'Question exported successfully', 'success');
+        } else {
+            throw new Error(data.message || 'Failed to export question');
+        }
+    })
+    .catch(error => {
+        console.error('Error exporting question:', error);
+        showToast('Error', 'Failed to export question: ' + error.message, 'error');
+    });
+}
+
+function convertToCSV(data) {
+    function escapeCSV(value) {
+        if (value == null) return '';
+        const stringValue = String(value);
+        const escapedValue = stringValue.replace(/"/g, '""');
+        return escapedValue.includes(',') ? `"${escapedValue}"` : escapedValue;
+    }
+
+    const csvRows = [];
+    csvRows.push(['Question ID', 'Question Text', 'Question Type'].map(escapeCSV).join(','));
+    csvRows.push([
+        data.question_id,
+        escapeCSV(data.question_text),
+        data.question_type
+    ].join(','));
+
+    csvRows.push('');
+
+    if (data.question_type === 'yes-no') {
+        csvRows.push(['Response', 'Count'].map(escapeCSV).join(','));
+        csvRows.push(`Yes,${data.responses['yes'] || 0}`);
+        csvRows.push(`No,${data.responses['no'] || 0}`);
+    } else if (data.question_type === 'rating') {
+        csvRows.push(['Rating', 'Count'].map(escapeCSV).join(','));
+        for (let i = 1; i <= 5; i++) {
+            csvRows.push(`${i},${data.responses[i.toString()] || 0}`);
+        }
+    } else if (data.question_type === 'text') {
+        csvRows.push(['Responses']);
+        data.responses.forEach(response => csvRows.push(escapeCSV(response)));
+    } else {
+        csvRows.push(['Unsupported question type']);
+    }
+
+    return csvRows.join('\n');
 }

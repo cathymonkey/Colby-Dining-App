@@ -217,6 +217,22 @@ def get_responses(question_id):
     # Return the responses as JSON
     return jsonify(response_data)
 
+@main_blueprint.route('/admin/feedback-question/export/<int:question_id>', methods=['GET'])
+@login_required
+@admin_required
+def export_responses(question_id):
+    response_data, error_message, status_code = get_responses(question_id)
+    print("Response data  ---------" , response_data)
+    if error_message:
+        return jsonify({'error': error_message}), status_code
+
+    # Convert response data to JSON (already serialized in get_response_data)
+    return jsonify({
+        "status": "success",
+        **response_data  # Merge response data into the final payload
+    }), 200
+
+
 # Wait times API
 @main_blueprint.route('/api/wait-times')
 def get_wait_times():
