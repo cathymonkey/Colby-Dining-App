@@ -221,16 +221,17 @@ def get_responses(question_id):
 @login_required
 @admin_required
 def export_responses(question_id):
-    response_data, error_message, status_code = get_responses(question_id)
-    print("Response data  ---------" , response_data)
-    if error_message:
-        return jsonify({'error': error_message}), status_code
+    response_data = get_responses(question_id)
+    # if error_message:
+    #     return jsonify({'error': error_message}), status_code
 
-    # Convert response data to JSON (already serialized in get_response_data)
-    return jsonify({
-        "status": "success",
-        **response_data  # Merge response data into the final payload
-    }), 200
+    # # Convert response data to JSON (already serialized in get_response_data)
+    # return jsonify({
+    #     "status": "success",
+    #     **response_data  # Merge response data into the final payload
+    # }), 200
+
+    return response_data
 
 
 # Wait times API
