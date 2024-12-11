@@ -111,8 +111,15 @@ function updateFeedbackQuestions(questions) {
         viewResponsesButton.innerHTML = '<i class="fas fa-chart-pie"></i>';
         viewResponsesButton.title = 'View Responses';
 
+        const ExportButton = document.createElement('button');
+        ExportButton.classList.add('btn', 'btn-outline-success');
+        ExportButton.innerHTML = '<i class="fas fa-file-export"></i>';
+        ExportButton.title = 'Export Question';
+
+        actionButtons.appendChild(editButton);
         actionButtons.appendChild(deleteButton);
-        actionButtons.appendChild(viewResponsesButton)
+        actionButtons.appendChild(viewResponsesButton);
+        actionButtons.appendChild(ExportButton);
 
         questionItem.appendChild(questionContent);
         questionItem.appendChild(actionButtons);
@@ -127,6 +134,10 @@ function updateFeedbackQuestions(questions) {
         
         // Add event listener for view response
         viewResponsesButton.addEventListener('click', () => loadResponses(question.id, question.question_type));
+        // Add even listener for export 
+        ExportButton.addEventListener('click', () => exportResponse(question.id, question.question_type));
+
+        
     });
         
 }
@@ -310,6 +321,7 @@ function setupEventListeners() {
 }
 
 let chartInstance;
+
 
 function loadResponses(questionId, questionType) {
     console.log('loadResponses function triggered');
@@ -525,3 +537,111 @@ function deleteSurveyLink(id) {
         showToast('Error', error.message, 'error');
     });
 }
+
+function exportResponse(questionId, questionType){
+    console.log('exportResponse function triggered');
+
+    // Show the modal immediately
+    // const responsesModal = new bootstrap.Modal(document.getElementById('responsesModal'));
+    // responsesModal.show();
+
+    // Create a URL to fetch responses based on the question ID
+    const url = `/admin/feedback-question/get-response/${questionId}`;
+    console.log(`Making GET request to: ${url}`);  // Log the URL being called
+
+    // Prepare query parameters (question_type will be included in the URL itself)
+    const params = new URLSearchParams({ question_type: questionType });
+
+    // Append query parameters to the URL
+    const finalUrl = `${url}?${params.toString()}`;
+
+    // Fetch responses from the server
+    fetch(finalUrl, {
+        method: 'GET', // This is a GET request
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Handle the data returned by the server
+        if (data.question) {
+
+            let csv_content = {"Question ID": questionId, "Question Text": data.question, "Question Type": questionType, "Response":data.responses};
+            console.log(csv_content);
+
+            // Convert to CSV
+            const csvContent = convertToCSV(csv_content);
+
+            // Create a Blob from the CSV content
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+            // Create a link to trigger the download
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${data.question}_responses.csv`; // Filename to download as
+
+            // Append the link to the document body, trigger the download, then remove the link
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Show success toast or message
+            showToast('Success', 'Question responses exported successfully', 'success');
+        }
+        else {
+            console.error('Failed to load responses:', data.error || 'Unknown error');
+        }
+    })
+    .catch(error => {
+        console.error('Error loading responses:', error);
+        showToast('Error', 'Failed to load responses: ' + error.message, 'error');
+    });
+}
+function convertToCSV(data) {
+    function escapeCSV(value) {
+        if (value == null) return '';
+        const stringValue = String(value);
+        const escapedValue = stringValue.replace(/"/g, '""');
+        return escapedValue.includes(',') ? `"${escapedValue}"` : escapedValue;
+    }
+
+    const csvRows = [];
+    csvRows.push(['Question ID', 'Question Text', 'Question Type'].map(escapeCSV).join(','));
+    csvRows.push([
+        data['Question ID'] || 'N/A',
+        data['Question Text'] || 'N/A',
+        data['Question Type'] || 'N/A'
+    ].join(','));
+
+    // Check if the question type is 'rating' and handle the responses accordingly
+    if (data['Question Type'] === 'rating') {
+        csvRows.push(['Rating', 'Count'].map(escapeCSV).join(','));
+
+        // Iterate over the response data, which is an object of ratings and counts
+        for (let i = 1; i <= 5; i++) {
+            csvRows.push(`${i},${data['Response'][i] || 0}`);
+        }
+    }
+    else if(data['Question Type'] === 'text'){
+        csvRows.push(['Count', 'Response'].map(escapeCSV).join(','));
+        let index = 0;
+
+        for (let i=0; i <= data['Response'].length-1; i++){
+            index = i;
+            csvRows.push(`${index}, ${data['Response'][i] ||''} `);
+        }
+
+    }
+    else if(data['Question Type'] === 'yes-no'){
+        csvRows.push(['Response', 'Count'].map(escapeCSV).join(','));
+
+        csvRows.push(`Yes, ${data['Response']['yes'] || 0}`);
+        csvRows.push(`No, ${data['Response']['no'] || 0}`);
+
+    }
+    else {
+        csvRows.push(['Unsupported question type']);
+    }
+
+    return csvRows.join('\n');
+}
+
+
