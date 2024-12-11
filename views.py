@@ -701,5 +701,44 @@ def delete_survey_link():
             'status': 'error',
             'message': str(e)
         }), 400
+    
+
+@main_blueprint.route('/api/trending-favorites')
+def get_trending_favorites():
+    """Get top 5 favorited dishes of the current month"""
+    try:
+        # Get current month's range
+        today = datetime.now()
+        start_date = datetime(today.year, today.month, 1)
+        
+        # Query to get most favorited dishes
+        trending = db.session.query(
+            FavoriteDish.dish_name,
+            db.func.count(FavoriteDish.dish_name).label('fav_count')
+        ).filter(
+            FavoriteDish.created_at >= start_date
+        ).group_by(
+            FavoriteDish.dish_name
+        ).order_by(
+            db.desc('fav_count')
+        ).limit(6).all()
+
+        logger.info(f"Found {len(trending)} trending items")
+
+        return jsonify({
+            'status': 'success',
+            'favorites': [{
+                'name': dish_name,
+                'favorites': count
+            } for dish_name, count in trending]
+        })
+
+    except Exception as e:
+        logger.error(f"Error fetching trending favorites: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': 'Unable to fetch trending favorites',
+            'debug_info': str(e)
+        }), 500
 
 
