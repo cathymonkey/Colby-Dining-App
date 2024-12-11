@@ -9,7 +9,7 @@ const colors = {
 document.addEventListener('DOMContentLoaded', function() {
     initializeDashboard();
     setupEventListeners();
-
+    
     setInterval(initializeDashboard, 1000);
 });
 
@@ -78,13 +78,13 @@ function updateFeedbackQuestions(questions) {
             editButton.innerHTML = '<i class="fas fa-edit"></i>';
             editButton.title = 'Edit Question';
             actionButtons.appendChild(editButton);
-
+            
             // Add event listener for edit
             editButton.addEventListener('click', () => editQuestion(question));
         } else {
             const reactivateButton = document.createElement('button');
             reactivateButton.classList.add('btn', 'btn-outline-success');
-            reactivateButton.innerHTML = '<i class="fas fa-sync-alt"></i>';
+            reactivateButton.innerHTML = '<i class="fas fa-sync-alt"></i>'; 
             reactivateButton.title = 'Reactivate Question'
             actionButtons.appendChild(reactivateButton)
             reactivateButton.onclick = () => reactivateQuestion(question.id);
@@ -92,37 +92,38 @@ function updateFeedbackQuestions(questions) {
 
         const deleteButton = document.createElement('button');
         deleteButton.classList.add('btn', 'btn-outline-danger');
-
-
+        
+        
         // Check if the question is active
         if (question.is_active) {
-            deleteButton.innerHTML = '<i class="fas fa-ban"></i>';
+            deleteButton.innerHTML = '<i class="fas fa-ban"></i>';  
             deleteButton.title = 'Deactivate Question';
             deleteButton.onclick = () => deactivateQuestion(question.id);
-        } else {
-            deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+        } else {    
+            deleteButton.innerHTML = '<i class="fas fa-trash"></i>';          
             deleteButton.title = 'Delete Question';
             deleteButton.onclick = () => deleteQuestion(question.id);
         }
-
+        
 
         const viewResponsesButton = document.createElement('button');
         viewResponsesButton.classList.add('btn', 'btn-outline-info');
         viewResponsesButton.innerHTML = '<i class="fas fa-chart-pie"></i>';
         viewResponsesButton.title = 'View Responses';
 
-         const ExportButton = document.createElement('button');
+        const ExportButton = document.createElement('button');
         ExportButton.classList.add('btn', 'btn-outline-success');
         ExportButton.innerHTML = '<i class="fas fa-file-export"></i>';
         ExportButton.title = 'Export Question';
 
+        actionButtons.appendChild(editButton);
         actionButtons.appendChild(deleteButton);
         actionButtons.appendChild(viewResponsesButton);
         actionButtons.appendChild(ExportButton);
 
         questionItem.appendChild(questionContent);
         questionItem.appendChild(actionButtons);
-
+        
         if (question.is_active) {
             feedbackList.appendChild(questionItem); // Append to active feedback
         } else {
@@ -130,13 +131,15 @@ function updateFeedbackQuestions(questions) {
             pastFeedbackList.appendChild(questionItem); // Append to past feedback
         }
 
-
+        
         // Add event listener for view response
         viewResponsesButton.addEventListener('click', () => loadResponses(question.id, question.question_type));
-        // Add even listener for export
+        // Add even listener for export 
         ExportButton.addEventListener('click', () => exportResponse(question.id, question.question_type));
-    });
 
+        
+    });
+        
 }
 
 // Deactivate question
@@ -207,7 +210,7 @@ function reactivateQuestion(questionId) {
         .then(response => response.json())
         .then(data => {
             const question = data.question;
-
+            
             // Check if the question is valid and has an active_end_date
             if (!question || !question.active_end_date) {
                 alert('Question data is not available or incomplete.');
@@ -270,7 +273,7 @@ function editQuestion(question) {
 function setupEventListeners() {
     const submitQuestionBtn = document.getElementById('submitQuestion');
     const feedbackModal = document.getElementById('feedbackModal');
-
+    
     submitQuestionBtn.addEventListener('click', () => {
         const form = document.getElementById('feedbackForm');
         const formData = new FormData(form);
@@ -286,7 +289,7 @@ function setupEventListeners() {
         }
 
         submitQuestionBtn.disabled = true;
-
+        
         fetch('/admin/feedback-question', {
             method: 'POST',
             body: formData
@@ -318,6 +321,7 @@ function setupEventListeners() {
 }
 
 let chartInstance;
+
 
 function loadResponses(questionId, questionType) {
     console.log('loadResponses function triggered');
@@ -450,7 +454,7 @@ function showToast(title, message, type = 'info') {
     toastElement.classList.add('toast');
     toastElement.classList.add(`bg-${type === 'error' ? 'danger' : type}`);
     toastElement.classList.add('text-white');
-
+    
     toastElement.innerHTML = `
         <div class="toast-header">
             <strong class="me-auto">${title}</strong>
@@ -639,3 +643,5 @@ function convertToCSV(data) {
 
     return csvRows.join('\n');
 }
+
+
