@@ -115,8 +115,8 @@ class FeedbackQuestion(db.Model):
 class Response(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     content = db.Column(db.Text, nullable = False)
-    #feedback_id = db.Column(db.Integer, db.ForeignKey('feedback.id'), nullable=False)
     question_id = db.Column(db.Integer, db.ForeignKey('feedback_question.id'), nullable=False)
+    student_email = db.Column(db.String(255), db.ForeignKey('student.student_email'), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 class WaitTime(db.Model):

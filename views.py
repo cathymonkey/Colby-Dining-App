@@ -1,4 +1,4 @@
-
+from sqlalchemy import cast, Date, and_, exists
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for
 from flask import Blueprint, render_template, redirect, url_for
 from flask import request, current_app
@@ -18,6 +18,7 @@ from email_utils import EmailSender
 from typing import Dict, List, Optional
 from menu_api import BonAppetitAPI
 from utils import deactivate_expired_questions
+import google.generativeai as genai
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -760,5 +761,138 @@ def get_trending_favorites():
             'message': 'Unable to fetch trending favorites',
             'debug_info': str(e)
         }), 500
+    
+@main_blueprint.route('/api/active-feedback-questions')
+@login_required
+def get_active_feedback_questions():
+    try:
+        current_date = datetime.now().date()
+        logger.info(f"Checking for active questions for {current_user.student_email} on {current_date}")
+        
+        # Check if user has already answered a question today
+        today_response = Response.query.filter(
+            cast(Response.created_at, Date) == current_date,
+            Response.student_email == current_user.student_email  
+        ).first()
+        
+        if today_response:
+            logger.info(f"User has already answered a question today")
+            return jsonify({
+                'status': 'success',
+                'question': None,
+                'message': 'Daily question limit reached'
+            })
+
+        # Get questions that:
+        # 1. Are active
+        # 2. Within date range
+        # 3. Haven't been answered by this user
+        valid_question = FeedbackQuestion.query\
+            .filter(
+                FeedbackQuestion.active_start_date <= current_date,
+                FeedbackQuestion.active_end_date >= current_date,
+                FeedbackQuestion.is_active == True,
+                ~exists().where(
+                    and_(
+                        Response.question_id == FeedbackQuestion.id,
+                        Response.student_email == current_user.student_email
+                    )
+                )
+            )\
+            .order_by(FeedbackQuestion.created_at)\
+            .first()
+
+        if valid_question:
+            logger.info(f"Found valid question: {valid_question.id}")
+            return jsonify({
+                'status': 'success',
+                'question': {
+                    'id': valid_question.id,
+                    'text': valid_question.question_text,
+                    'type': valid_question.question_type
+                }
+            })
+        
+        logger.info("No valid questions found")
+        return jsonify({
+            'status': 'success',
+            'question': None,
+            'message': 'No new questions available'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting active questions: {str(e)}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+    
+@main_blueprint.route('/api/submit-feedback', methods=['POST'])
+@login_required
+def submit_feedback_response():
+    try:
+        data = request.get_json()
+        question_id = data.get('question_id')
+        content = data.get('response')
+        
+        # Validate input
+        if not all([question_id, content]):
+            return jsonify({
+                'status': 'error', 
+                'message': 'Missing required fields'
+            }), 400
+
+        # Get current date for checking
+        current_date = datetime.now().date()
+
+        # Check if user has already submitted today
+        existing_today = Response.query\
+            .filter(cast(Response.created_at, Date) == current_date)\
+            .first()
+            
+        if existing_today:
+            return jsonify({
+                'status': 'error',
+                'message': 'Daily feedback limit reached'
+            }), 400
+
+        # Check if question exists and is active
+        question = FeedbackQuestion.query.get(question_id)
+        if not question or not question.is_active:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid or inactive question'
+            }), 400
+        if content.type == 'text':
+            user_text = content.response
+
+            key=os.getenv('GEMINI_KEY')
+            genai.configure(api_key=key)
+            model = genai.GenerativeModel("gemini-1.5-flash")
+
+            processed_text = model.generate_content("You are given a feedback response from a user, check if the response contains any form of hate speech. If so, return 'RESPONSE REMOVED' else, return the original response as it is without any other modification. USER RESPONSE:" + user_text)
+
+            new_response = Response(
+                content=processed_text,
+                question_id=question_id,
+                created_at=datetime.now()
+            )
+        else:
+            # Create new response
+            new_response = Response(
+                content=content,
+                question_id=question_id,
+                created_at=datetime.now()
+            )
+        
+        db.session.add(new_response)
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Response submitted successfully'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error submitting feedback: {str(e)}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 

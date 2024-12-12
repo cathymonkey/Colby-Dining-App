@@ -51,7 +51,6 @@ def remove_admin(email):
             print(f"Error removing administrator: {str(e)}")
             return False
 
-
 def validate_email(email):
     """
     Validate that the email is a @colby.edu address
@@ -59,6 +58,7 @@ def validate_email(email):
     if not email.endswith('@colby.edu'):
         raise argparse.ArgumentTypeError("Email must be a @colby.edu address")
     return email
+>>>>>>> 3dd45170dd73288f0a568dbc7d697b189f401b3a
 
 
 def main():
