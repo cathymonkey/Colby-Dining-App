@@ -199,6 +199,15 @@ header h1 {
     padding-left: 1rem;
     border-left: 4px solid var(--secondary-color);
 }
+.station-header {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
 
 /* Menu Items */
 .menu-items-grid {
@@ -350,6 +359,10 @@ header h1 {
     padding: 0.5rem 1rem;
     border-radius: 2rem;
     margin-bottom: 1rem;
+}
+
+.back-to-top{
+    transition: all 0.2s ease;
 }
 
 .status-open {

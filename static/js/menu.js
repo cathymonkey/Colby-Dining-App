@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         createStationsHtml(stations) {
             return Object.entries(stations).map(([stationName, items]) => `
-                <div class="station-section">
+                <div class="station-section" data-bs-toggle="collapse">
                     <h3>${stationName}</h3>
                     <div class="menu-items-grid">
                         ${items.map(item => this.createItemHtml(item)).join('')}
