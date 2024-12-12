@@ -1,1 +1,1 @@
-web: gunicorn --pythonpath . app:app --log-level debug
+web: gunicorn --log-level debug 'app:create_app()'
