@@ -1,7 +1,6 @@
 from app import create_app
 from models import db, WaitTime, Food, Tag, FeedbackQuestion, Response
 from datetime import datetime, time, timedelta
-from models import db, FeedbackQuestion
 import random
 
 app = create_app()
@@ -38,44 +37,7 @@ def generate_wait_times():
                 db.session.add(wait_time)
     
     db.session.commit()
-    print(f"Generated {WaitTime.query.count()} wait time records.")\
-
-def generate_feedback_questions():
-    """Generates test feedback questions for the database."""
-    print("Generating feedback questions...")
-
-    # Define test feedback questions
-    questions = [
-        # FeedbackQuestion(
-        #     question_text="Did you enjoy your meal today?",
-        #     question_type="yes_no",
-        #     active_start_date=datetime.utcnow() - timedelta(days=1),
-        #     active_end_date=datetime.utcnow() + timedelta(days=7),
-        #     created_at=datetime.utcnow()
-        # )
-        # FeedbackQuestion(
-        #     question_text = "What did you like most about your experience?",
-        #     question_type = "short_answer",
-        #     active_start_date = datetime.utcnow() - timedelta(days=1),
-        #     active_end_date = datetime.utcnow() + timedelta(days=7),
-        #     created_at = datetime.utcnow()
-        # )
-        FeedbackQuestion(
-            question_text="Rate the quality of service today (1-5).",
-            question_type="rating",
-            active_start_date=datetime.utcnow() - timedelta(days=1),
-            active_end_date=datetime.utcnow() + timedelta(days=7),
-            created_at=datetime.utcnow()
-        )
-    ]
-
-    try:
-        db.session.add_all(questions)
-        db.session.commit()
-        print("Feedback questions generated successfully!")
-    except Exception as e:
-        print(f"Error generating feedback questions: {e}")
-        db.session.rollback()
+    print(f"Generated {WaitTime.query.count()} wait time records.")
 
 def generate_foods_and_tags():
     # Create tags
@@ -227,5 +189,6 @@ def generate_feedback():
 with app.app_context():
     db.drop_all
     db.create_all()
-
-   
+    # generate_wait_times() 
+    # generate_foods_and_tags()
+    generate_feedback()
