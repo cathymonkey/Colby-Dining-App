@@ -57,6 +57,15 @@ class Favorites(db.Model):
     student_email = db.Column(db.String(255), db.ForeignKey('student.student_email'), nullable = False)
     food_id = db.Column(db.Integer, db.ForeignKey('food.id'), nullable = False)
 
+class FavoriteDish(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_email = db.Column(db.String(255), db.ForeignKey('student.student_email'), nullable=False)
+    dish_name = db.Column(db.String(255), nullable=False)  # We'll use dish name as unique identifier
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Composite unique constraint to prevent duplicate favorites
+    __table_args__ = (db.UniqueConstraint('student_email', 'dish_name'),)
+
 class Administrator(db.Model, UserMixin):
     admin_email = db.Column(db.String(255), primary_key=True)
     password_hashed = db.Column(db.String(128), nullable=False)
@@ -67,8 +76,14 @@ class Administrator(db.Model, UserMixin):
     picture = db.Column(db.String(255))  # Google profile picture URL
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime)
-    feedback = db.relationship('Feedback', backref='administrator')
-    feedback_questions = db.relationship('FeedbackQuestion', backref='administrator')
+    
+    # Relationship with FeedbackQuestion
+    feedback_questions = db.relationship(
+        'FeedbackQuestion', 
+        backref='administrator',
+        cascade='all, delete-orphan',
+        lazy='dynamic'
+    )
 
     def get_id(self):
         """Required for Flask-Login"""
@@ -76,15 +91,6 @@ class Administrator(db.Model, UserMixin):
 
     def __repr__(self):
         return f'<Administrator {self.admin_email}>'
-
-class Feedback(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    admin_email = db.Column(db.String(255), db.ForeignKey('administrator.admin_email'), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    num_responses = db.Column(db.Integer)
-    created_at = db.Column(db.Date, nullable=False)
-    update_at = db.Column(db.Date, nullable=False)
-    response = db.relationship('Response', backref='feedback')
 
 class FeedbackQuestion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -94,13 +100,24 @@ class FeedbackQuestion(db.Model):
     active_end_date = db.Column(db.Date, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_active = db.Column(db.Boolean, default=True)
     administrator_id = db.Column(db.String(255), db.ForeignKey('administrator.admin_email'), nullable=False)
+
+    # Relationship with Response (one-to-many)
+    responses = db.relationship(
+        'Response', 
+        backref='feedback_question', 
+        cascade='all, delete-orphan', 
+        lazy='dynamic'
+    )
 
 
 class Response(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     content = db.Column(db.Text, nullable = False)
-    feedback_id = db.Column(db.Integer, db.ForeignKey('feedback.id'), nullable = False)
+    #feedback_id = db.Column(db.Integer, db.ForeignKey('feedback.id'), nullable=False)
+    question_id = db.Column(db.Integer, db.ForeignKey('feedback_question.id'), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 class YesNoResponse(Response):
     is_yes = db.Column(db.Boolean, nullable=False)
@@ -122,6 +139,14 @@ class WaitTime(db.Model):
     date = db.Column(db.Date, nullable = False)
     day_of_week = db.Column(db.Integer, nullable = False)
     predicted_wait = db.Column(db.Integer, nullable = False)
+
+class SurveyLink(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
+    url = db.Column(db.String(500), nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    admin_email = db.Column(db.String(255), db.ForeignKey('administrator.admin_email'), nullable=False)
 
 
 

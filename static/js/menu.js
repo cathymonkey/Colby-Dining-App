@@ -10,10 +10,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         // DOM Elements
-        init() {
+        async init() {
             this.menuContainer = document.getElementById('menu-container');
             this.loadingSpinner = document.getElementById('loading-spinner');
             this.errorMessage = document.getElementById('error-message');
+            
+            // Load favorites before initializing the rest
+            await this.loadFavorites();
+            
             this.initializeEventListeners();
             this.loadMenu();
         },
@@ -26,6 +30,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.updateActiveButton(e.target, '[data-hall]');
                     this.loadMenu();
                 });
+            });
+
+            this.menuContainer.addEventListener('click', (e) => {
+                const favoriteBtn = e.target.closest('.favorite-btn');
+                if (favoriteBtn) {
+                    const dishName = favoriteBtn.dataset.dish;
+                    this.toggleFavorite(dishName);
+                }
             });
 
             // Date picker
@@ -193,26 +205,99 @@ document.addEventListener('DOMContentLoaded', () => {
             }, {});
         },
 
+        // createStationsHtml(stations) {
+        //     return Object.entries(stations).map(([stationName, items]) => `
+        //         <div class="station-section" data-bs-toggle="collapse">
+        //             <h3>${stationName}</h3>
+        //             <div class="menu-items-grid">
+        //                 ${items.map(item => this.createItemHtml(item)).join('')}
+        //             </div>
+        //         </div>
+        //     `).join('');
+        // },
         createStationsHtml(stations) {
-            return Object.entries(stations).map(([stationName, items]) => `
-                <div class="station-section">
-                    <h3>${stationName}</h3>
-                    <div class="menu-items-grid">
-                        ${items.map(item => this.createItemHtml(item)).join('')}
-                    </div>
-                </div>
-            `).join('');
-        },
+    return Object.entries(stations).map(([stationName, items], index) => `
+        <div class="station-section">
+            <h3 
+                class="station-header" 
+                data-bs-toggle="collapse" 
+                data-bs-target="#station-${index}" 
+                aria-expanded="false" 
+                aria-controls="station-${index}"
+            >
+                ${stationName}
+                <i class="collapse-icon"></i>
+            </h3>
+            <div 
+                id="station-${index}" 
+                class="menu-items-grid collapse"
+            >
+                ${items.map(item => this.createItemHtml(item)).join('')}
+            </div>
+        </div>
+    `).join('');
+},
 
         createItemHtml(item) {
+            // First, let's check if this item is in favorites
+            const isFavorited = this.favorites?.includes(item.name);
+            const heartIcon = isFavorited ? 'fas fa-heart text-danger' : 'far fa-heart';
+            
             return `
                 <div class="menu-item">
-                    <h4>${item.name}</h4>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h4>${item.name}</h4>
+                        <button class="btn btn-link favorite-btn ${isFavorited ? 'favorited' : ''}" 
+                            data-dish="${item.name}">
+                            <i class="${heartIcon}"></i>
+                        </button>
+                    </div>
                     ${item.description ? `<p>${item.description}</p>` : ''}
                     ${this.createDietaryFlagsHtml(item.dietary_flags)}
                     ${this.createNutritionHtml(item.nutrition)}
                 </div>
             `;
+        },
+        
+        // Add these new methods to menuManager
+        async loadFavorites() {
+            try {
+                const response = await fetch('/api/favorites');
+                const data = await response.json();
+                if (data.status === 'success') {
+                    this.favorites = data.favorites.map(f => f.dish_name);
+                }
+            } catch (error) {
+                console.error('Error loading favorites:', error);
+                this.favorites = [];
+            }
+        },
+        
+        async toggleFavorite(dishName) {
+            try {
+                const method = this.favorites?.includes(dishName) ? 'DELETE' : 'POST';
+                const response = await fetch('/api/favorites', {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ dish_name: dishName })
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    // Update local favorites list
+                    if (method === 'POST') {
+                        this.favorites = [...(this.favorites || []), dishName];
+                    } else {
+                        this.favorites = this.favorites.filter(f => f !== dishName);
+                    }
+                    // Re-render the menu to update icons
+                    this.filterCurrentMenu();
+                }
+            } catch (error) {
+                console.error('Error toggling favorite:', error);
+            }
         },
 
         createDietaryFlagsHtml(flags) {

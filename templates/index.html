@@ -95,6 +95,29 @@
         </div>
         <!-- Navbar & Hero End -->
 
+        <!-- Wait Times Start -->
+        <div class="container-xxl py-5">
+            <div class="container">
+                <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+                    <h5 class="section-title ff-secondary text-center text-primary fw-normal">Real-Time Updates</h5>
+                    <h1 class="mb-5">Current Wait Times</h1>
+                </div>
+                
+                <div class="wait-times-section wow fadeInUp" data-wow-delay="0.2s">
+                    <div class="wait-times-header">
+                        <h3>Wait Time Estimation</h3>
+                        <span class="last-updated wait-times-updated">Last updated: --:--</span>
+                    </div>
+                    
+                    <div class="wait-times-container">
+                        <!-- Wait time cards will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Wait Times End -->
+
+        
         <!-- About Start -->
         <div class="container-xxl py-5">
             <div class="container">
@@ -150,28 +173,23 @@
         <!-- About End -->
 
 
-        <!-- Wait Times Start -->
+
         <div class="container-xxl py-5">
             <div class="container">
                 <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
-                    <h5 class="section-title ff-secondary text-center text-primary fw-normal">Real-Time Updates</h5>
-                    <h1 class="mb-5">Current Wait Times</h1>
+                    <h5 class="section-title ff-secondary text-center text-primary fw-normal">Community Favorites</h5>
+                    <h1 class="mb-5">Most Popular Dishes This Month</h1>
                 </div>
-                
-                <div class="wait-times-section wow fadeInUp" data-wow-delay="0.2s">
-                    <div class="wait-times-header">
-                        <h3>Wait Time Estimation</h3>
-                        <span class="last-updated wait-times-updated">Last updated: --:--</span>
-                    </div>
-                    
-                    <div class="wait-times-container">
-                        <!-- Wait time cards will be dynamically inserted here -->
+                <div class="row g-4" id="trending-favorites">
+                    <!-- Favorites will be loaded here -->
+                    <div class="col-12 text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Wait Times End -->
-
 
         <!-- Menu Start -->
         <!-- <div class="container-xxl py-5">
@@ -247,7 +265,7 @@
         <!-- Menu End -->
 
 
-        <!-- Reservation Start -->
+        
         <div class="container-xxl py-5 px-0 wow fadeInUp" data-wow-delay="0.1s">
             <div class="row g-0">
                 <div class="col-md-6">

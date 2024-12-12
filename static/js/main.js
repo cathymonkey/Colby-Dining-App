@@ -206,3 +206,69 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+function loadTrendingFavorites() {
+    const container = document.getElementById('trending-favorites');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="col-12 text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
+
+    fetch('/api/trending-favorites')
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === 'success' && data.favorites && data.favorites.length > 0) {
+                container.innerHTML = data.favorites.map((dish, index) => `
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="${0.1 + (index * 0.2)}s">
+                        <div class="service-item rounded pt-3">
+                            <div class="p-4">
+                                <h5 class="mb-3">${dish.name}</h5>
+                                <div class="d-flex align-items-center">
+                                    <i class="fa fa-heart text-primary me-2"></i>
+                                    <span>${dish.favorites} students love this</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = `
+                    <div class="col-12 text-center">
+                        <div class="p-4">
+                            <i class="fa fa-heart text-primary mb-3" style="font-size: 2rem;"></i>
+                            <p class="text-muted">Ready to discover favorite dishes? Browse our menu and start saving your favorites!</p>
+                            <a href="/menu" class="btn btn-primary mt-3">
+                                <i class="fa fa-cutlery me-2"></i>Browse Menu
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading trending favorites:', error);
+            container.innerHTML = `
+                <div class="col-12 text-center">
+                    <div class="p-4">
+                        <i class="fa fa-exclamation-circle text-danger mb-3" style="font-size: 2rem;"></i>
+                        <p class="text-danger">Unable to load trending favorites</p>
+                        <button onclick="loadTrendingFavorites()" class="btn btn-primary mt-3">
+                            <i class="fa fa-refresh me-2"></i>Try Again
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadTrendingFavorites();
+});
+

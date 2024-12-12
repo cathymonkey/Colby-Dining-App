@@ -2,7 +2,7 @@
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for
 from flask import Blueprint, render_template, redirect, url_for
 from flask import request, current_app
-from models import db, Food, Tag, food_tags
+from models import db, Food, Tag, food_tags, Response
 from flask_login import login_required, current_user
 from utils import filter_foods, get_all_foods
 from flask import Blueprint, render_template, jsonify
@@ -13,10 +13,11 @@ import os
 import logging
 from auth import admin_required
 from dining_predictor import DiningHallPredictor
-from models import db, FeedbackQuestion, Administrator
+from models import db, FeedbackQuestion, Administrator, FavoriteDish, SurveyLink
 from email_utils import EmailSender
 from typing import Dict, List, Optional
 from menu_api import BonAppetitAPI
+from utils import deactivate_expired_questions
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -135,24 +136,105 @@ def create_feedback_question():
         db.session.rollback()
         return jsonify({'status': 'error', 'message': str(e)}), 400
 
-@main_blueprint.route('/admin/feedback-question/<int:question_id>', methods=['DELETE'])
+
+@main_blueprint.route('/admin/feedback-question/<int:question_id>/deactivate', methods=['PUT'])
+@login_required
+@admin_required
+def deactivate_feedback_question(question_id):
+    try:
+        question = FeedbackQuestion.query.get_or_404(question_id)
+        
+        # Ensure the user has permission to deactivate the question
+        if question.administrator_id != current_user.admin_email:
+            return jsonify({'status': 'error', 'message': 'Unauthorized to deactivate this question'}), 403
+
+        # Deactivate the question if it is active
+        if question.is_active:
+            question.is_active = False
+            db.session.commit()
+            return jsonify({'status': 'success', 'message': 'Question deactivated successfully'})
+        else:
+            return jsonify({'status': 'error', 'message': 'Question is already deactivated'}), 400
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': str(e)}), 400
+
+@main_blueprint.route('/admin/feedback-question/<int:question_id>/delete', methods=['DELETE'])
 @login_required
 @admin_required
 def delete_feedback_question(question_id):
     try:
         question = FeedbackQuestion.query.get_or_404(question_id)
+
+        # Ensure the user has permission to delete the question
         if question.administrator_id != current_user.admin_email:
             return jsonify({'status': 'error', 'message': 'Unauthorized to delete this question'}), 403
+
+        # Only delete the question if it is already deactivated (inactive)
+        if not question.is_active:
+            db.session.delete(question)
+            db.session.commit()
+            return jsonify({'status': 'success', 'message': 'Question deleted successfully'})
+        else:
+            return jsonify({'status': 'error', 'message': 'Cannot delete an active question'}), 400
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': str(e)}), 400
+    
+@main_blueprint.route('/admin/feedback-question/<int:question_id>/reactivate', methods=['PUT'])
+@login_required
+@admin_required
+def reactivate_feedback_question(question_id):
+    try:
+        question = FeedbackQuestion.query.get_or_404(question_id)
         
-        db.session.delete(question)
+        # Check if the current user is the administrator who created the question
+        if question.administrator_id != current_user.admin_email:
+            return jsonify({'status': 'error', 'message': 'Unauthorized to reactivate this question'}), 403
+
+        # Reactivate the question
+        question.is_active = True
         db.session.commit()
-        return jsonify({'status': 'success', 'message': 'Question deleted successfully'})
+
+        return jsonify({'status': 'success', 'message': 'Question reactivated successfully'})
+    
     except Exception as e:
         db.session.rollback()
         return jsonify({'status': 'error', 'message': str(e)}), 400
 
+
+@main_blueprint.route('/admin/feedback-question/<int:question_id>', methods=['GET'])
+def get_feedback_question(question_id):
+    try:
+        # Fetch the question by ID
+        question = FeedbackQuestion.query.get_or_404(question_id)
+        
+        # Return the question details in the response
+        return jsonify({
+            'status': 'success',
+            'question': {
+                'id': question.id,
+                'question_text': question.question_text,
+                'question_type': question.question_type,
+                'active_start_date': question.active_start_date.isoformat(),
+                'active_end_date': question.active_end_date.isoformat(),
+                'created_at': question.created_at.isoformat() if question.created_at else None,
+                'is_active': question.is_active,
+                'administrator_id': question.administrator_id
+            }
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@login_required
+@admin_required
 @main_blueprint.route('/api/admin/feedback-questions', methods=['GET'])
 def get_feedback_questions():
+    deactivate_expired_questions()
+
     try:
         questions = FeedbackQuestion.query.order_by(FeedbackQuestion.created_at.desc()).all()
         return jsonify({
@@ -163,11 +245,76 @@ def get_feedback_questions():
                 'question_type': q.question_type,
                 'active_start_date': q.active_start_date.isoformat(),
                 'active_end_date': q.active_end_date.isoformat(),
-                'created_at': q.created_at.isoformat() if q.created_at else None
+                'created_at': q.created_at.isoformat() if q.created_at else None,
+                'is_active': q.is_active,
+                'administrator_id': q.administrator_id
             } for q in questions]
         })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+    
+@main_blueprint.route('/admin/feedback-question/get-response/<int:question_id>', methods=['GET'])
+@login_required
+@admin_required
+def get_responses(question_id):
+    question_type = request.args.get('question_type')
+    
+    # Fetch the question and responses from the database
+    feedback_question = FeedbackQuestion.query.get(question_id)
+    
+    if not feedback_question:
+        return jsonify({'error': 'Question not found'}), 404
+
+    # Check if the question type matches the one in the query parameters
+    if feedback_question.question_type != question_type:
+        return jsonify({'error': 'Mismatched question type'}), 400
+
+    # Get the responses
+    responses = Response.query.filter_by(question_id=question_id).all()
+    
+    # Prepare the responses data based on the question type
+    response_data = {'question': feedback_question.question_text, 'responses': {}}
+    
+    if question_type == 'yes-no':
+        yes_count = 0
+        no_count = 0
+        for response in responses:
+            if response.content.lower() == 'yes':
+                yes_count += 1
+            elif response.content.lower() == 'no':
+                no_count += 1
+        response_data['responses'] = {'yes': yes_count, 'no': no_count}
+    
+    elif question_type == 'rating':
+        rating_counts = {str(i): 0 for i in range(1, 6)}  # Ratings 1 to 5
+        for response in responses:
+            if response.content in rating_counts:
+                rating_counts[response.content] += 1
+        response_data['responses'] = rating_counts
+    
+    elif question_type == 'text':
+        text_responses = [response.content for response in responses]
+        response_data['responses'] = text_responses
+    
+    # Return the responses as JSON
+    return jsonify(response_data)
+
+@main_blueprint.route('/admin/feedback-question/export/<int:question_id>', methods=['GET'])
+@login_required
+@admin_required
+def export_responses(question_id):
+    response_data = get_responses(question_id)
+    # if error_message:
+    #     return jsonify({'error': error_message}), status_code
+
+    # # Convert response data to JSON (already serialized in get_response_data)
+    # return jsonify({
+    #     "status": "success",
+    #     **response_data  # Merge response data into the final payload
+    # }), 200
+
+    return response_data
+
 
 # Wait times API
 @main_blueprint.route('/api/wait-times')
@@ -441,6 +588,175 @@ def get_dining_hours():
         return jsonify({
             'status': 'error',
             'message': 'Unable to fetch dining hours'
+        }), 500
+    
+
+@main_blueprint.route('/api/favorites', methods=['POST', 'DELETE'])
+@login_required
+def manage_favorites():
+    try:
+        data = request.get_json()
+        dish_name = data.get('dish_name')
+        
+        if not dish_name:
+            return jsonify({'status': 'error', 'message': 'Dish name required'}), 400
+            
+        if request.method == 'POST':
+            favorite = FavoriteDish(
+                student_email=current_user.student_email,
+                dish_name=dish_name
+            )
+            db.session.add(favorite)
+            message = 'Dish added to favorites'
+        else:  # DELETE
+            favorite = FavoriteDish.query.filter_by(
+                student_email=current_user.student_email,
+                dish_name=dish_name
+            ).first()
+            
+            if not favorite:
+                return jsonify({'status': 'error', 'message': 'Favorite not found'}), 404
+                
+            db.session.delete(favorite)
+            message = 'Dish removed from favorites'
+            
+        db.session.commit()
+        return jsonify({'status': 'success', 'message': message})
+        
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': 'Dish already in favorites'}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@main_blueprint.route('/api/favorites', methods=['GET'])
+@login_required
+def get_favorites():
+    try:
+        favorites = FavoriteDish.query.filter_by(
+            student_email=current_user.student_email
+        ).order_by(FavoriteDish.created_at.desc()).all()
+        
+        return jsonify({
+            'status': 'success',
+            'favorites': [{'dish_name': f.dish_name} for f in favorites]
+        })
+        
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+    
+@main_blueprint.route('/api/active-survey')
+def get_active_survey():
+    try:
+        active_survey = SurveyLink.query.filter_by(is_active=True).order_by(SurveyLink.created_at.desc()).first()
+        if active_survey:
+            return jsonify({
+                'status': 'success',
+                'survey': {
+                    'title': active_survey.title,
+                    'url': active_survey.url
+                }
+            })
+        return jsonify({
+            'status': 'error',
+            'message': 'No active survey found'
+        }), 404
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+    
+@main_blueprint.route('/admin/survey-link', methods=['POST'])
+@login_required
+@admin_required
+def create_survey_link():
+    try:
+        # Deactivate all existing surveys first
+        SurveyLink.query.update({SurveyLink.is_active: False})
+        
+        # Create new survey link
+        new_survey = SurveyLink(
+            title=request.form.get('title'),
+            url=request.form.get('url'),
+            admin_email=current_user.admin_email,
+            is_active=True
+        )
+        
+        db.session.add(new_survey)
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Survey link updated successfully'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 400
+
+@main_blueprint.route('/admin/survey-link', methods=['DELETE'])
+@login_required
+@admin_required
+def delete_survey_link():
+    try:
+        # Deactivate all surveys
+        SurveyLink.query.update({SurveyLink.is_active: False})
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Survey link removed successfully'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 400
+    
+
+@main_blueprint.route('/api/trending-favorites')
+def get_trending_favorites():
+    """Get top 5 favorited dishes of the current month"""
+    try:
+        # Get current month's range
+        today = datetime.now()
+        start_date = datetime(today.year, today.month, 1)
+        
+        # Query to get most favorited dishes
+        trending = db.session.query(
+            FavoriteDish.dish_name,
+            db.func.count(FavoriteDish.dish_name).label('fav_count')
+        ).filter(
+            FavoriteDish.created_at >= start_date
+        ).group_by(
+            FavoriteDish.dish_name
+        ).order_by(
+            db.desc('fav_count')
+        ).limit(6).all()
+
+        logger.info(f"Found {len(trending)} trending items")
+
+        return jsonify({
+            'status': 'success',
+            'favorites': [{
+                'name': dish_name,
+                'favorites': count
+            } for dish_name, count in trending]
+        })
+
+    except Exception as e:
+        logger.error(f"Error fetching trending favorites: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': 'Unable to fetch trending favorites',
+            'debug_info': str(e)
         }), 500
 
 

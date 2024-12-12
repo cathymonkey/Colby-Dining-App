@@ -860,3 +860,13 @@
 .popup button:hover {
     background-color: #003871;
 }
+.btn-outline-primary.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-outline-primary.disabled:hover {
+    background-color: transparent;
+    color: var(--primary);
+    transform: none;
+}
