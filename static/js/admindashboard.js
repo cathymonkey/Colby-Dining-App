@@ -10,6 +10,17 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeDashboard();
     setupEventListeners();
 
+    if (!window.waitTimeChart) {
+        window.waitTimeChart = new WaitTimeAnalysis();
+        window.waitTimeChart.init();
+    }
+
+    if (!window.popularDishesChart) {
+        window.popularDishesChart = new PopularDishesChart();
+        window.popularDishesChart.init();
+    }
+
+
     setInterval(initializeDashboard, 1000);
 });
 
@@ -771,4 +782,316 @@ function convertToCSV(data) {
     }
 
     return csvRows.join('\n');
+}
+
+// Wait Time Analysis Chart
+class WaitTimeAnalysis {
+    constructor() {
+        this.chart = null;
+        this.timeRange = 'today';
+        this.chartContainer = document.querySelector('.chart-container');
+        this.initialized = false;
+    }
+
+    init() {
+        if (!this.chartContainer || this.initialized) return;
+
+        this.initialized = true;
+        this.createChartStructure();
+        this.initChart();
+        this.setupEventListeners();
+        this.updateChart();
+    }
+
+    createChartStructure() {
+        // Create time range tabs
+        const periodTabs = `
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-primary active" data-range="today">Today</button>
+                    <button type="button" class="btn btn-outline-primary" data-range="week">Past Week</button>
+                    <button type="button" class="btn btn-outline-primary" data-range="month">Past Month</button>
+                </div>
+                <div class="text-muted small">Last updated: <span id="chart-last-updated"></span></div>
+            </div>`;
+
+        // Create canvas wrapper with proper height
+        const canvasWrapper = `<div style="height: 300px;"><canvas id="waitTimeChart"></canvas></div>`;
+
+        this.chartContainer.innerHTML = periodTabs + canvasWrapper;
+    }
+
+    initChart() {
+        const ctx = document.getElementById('waitTimeChart').getContext('2d');
+        Chart.defaults.font.family = "'Heebo', sans-serif";
+        
+        this.chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Dana',
+                        borderColor: colors.Dana,
+                        backgroundColor: `${colors.Dana}1a`,
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Roberts',
+                        borderColor: colors.Roberts,
+                        backgroundColor: `${colors.Roberts}1a`,
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Foss',
+                        borderColor: colors.Foss,
+                        backgroundColor: `${colors.Foss}1a`,
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Wait Time (minutes)',
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        align: 'end'
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        titleColor: '#000',
+                        bodyColor: '#666',
+                        borderColor: '#e9ecef',
+                        borderWidth: 1,
+                        padding: 10,
+                        boxPadding: 5,
+                        usePointStyle: true,
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y} minutes`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    setupEventListeners() {
+        document.querySelectorAll('[data-range]').forEach(button => {
+            button.addEventListener('click', (e) => {
+                document.querySelectorAll('[data-range]').forEach(btn => {
+                    btn.classList.remove('btn-primary', 'active');
+                    btn.classList.add('btn-outline-primary');
+                });
+                e.target.classList.remove('btn-outline-primary');
+                e.target.classList.add('btn-primary', 'active');
+
+                this.timeRange = e.target.dataset.range;
+                this.updateChart();
+            });
+        });
+    }
+
+    async updateChart() {
+        try {
+            const data = await this.fetchWaitTimeData();
+            this.chart.data.labels = data.labels;
+            this.chart.data.datasets.forEach((dataset, index) => {
+                dataset.data = data.datasets[index].data;
+            });
+            
+            // Update last updated time
+            const lastUpdated = document.getElementById('chart-last-updated');
+            if (lastUpdated) {
+                lastUpdated.textContent = new Date().toLocaleTimeString();
+            }
+            
+            this.chart.update();
+        } catch (error) {
+            console.error('Error updating chart:', error);
+            showToast('Error', 'Failed to update wait time chart', 'error');
+        }
+    }
+
+    async fetchWaitTimeData() {
+        // TODO: Replace this with actual API call
+        const dataPoints = this.timeRange === 'today' ? 24 : 
+                         this.timeRange === 'week' ? 7 : 30;
+
+        const labels = Array.from({ length: dataPoints }, (_, i) => {
+            if (this.timeRange === 'today') {
+                return `${i}:00`;
+            } else {
+                return `Day ${i + 1}`;
+            }
+        });
+
+        const generateData = () => Array.from({ length: dataPoints }, () => 
+            Math.floor(Math.random() * 15) + 5
+        );
+
+        return {
+            labels,
+            datasets: [
+                { data: generateData() },
+                { data: generateData() },
+                { data: generateData() }
+            ]
+        };
+    }
+}
+
+// Export the class to make it available globally
+window.WaitTimeAnalysis = WaitTimeAnalysis;
+
+
+class PopularDishesChart {
+    constructor() {
+        this.chart = null;
+        this.chartContext = document.getElementById('popularFoodsChart').getContext('2d');
+        this.initialized = false;
+    }
+
+    init() {
+        if (this.initialized) return;
+        this.initialized = true;
+        this.createChart();
+        this.updateChart();
+        // Update every 5 minutes
+        setInterval(() => this.updateChart(), 300000);
+    }
+
+    createChart() {
+        Chart.defaults.font.family = "'Heebo', sans-serif";
+        this.chart = new Chart(this.chartContext, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Number of Favorites',
+                    data: [],
+                    backgroundColor: [
+                        colors.Dana,     // Professional blue
+                        colors.Roberts,  // Nature green
+                        colors.Foss,     // Warm red
+                        '#f1c40f',      // Yellow
+                        '#9b59b6',      // Purple
+                        '#3498db'       // Light blue
+                    ],
+                    borderRadius: 2,
+                    barThickness: 25,
+                    maxBarThickness: 25
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                // layout: {
+                //     padding: {
+                //         top: 20,
+                //         right: 25,
+                //         bottom: 55,
+                //         left: 25
+                //     }
+                // },
+            
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        titleColor: '#000',
+                        bodyColor: '#666',
+                        borderColor: '#e9ecef',
+                        borderWidth: 1,
+                        padding: 10,
+                        boxPadding: 5,
+                        displayColors: true,
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.raw} favorites`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            drawBorder: false,
+                            color: '#e9ecef'
+                        },
+                        ticks: {
+                            precision: 0,
+                            font: {
+                                size: 11
+                            },
+                            stepSize: 1 
+                        },
+                        max: 5
+                    },
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45,
+                            padding: 10,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    async updateChart() {
+        try {
+            const response = await fetch('/api/trending-favorites');
+            const data = await response.json();
+
+            if (data.status === 'success' && data.favorites) {
+                // Update chart data
+                this.chart.data.labels = data.favorites.map(item => item.name);
+                this.chart.data.datasets[0].data = data.favorites.map(item => item.favorites);
+                this.chart.update();
+            }
+        } catch (error) {
+            console.error('Error fetching popular dishes:', error);
+        }
+    }
 }
