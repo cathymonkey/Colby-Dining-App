@@ -9,7 +9,7 @@ const colors = {
 document.addEventListener('DOMContentLoaded', function() {
     initializeDashboard();
     setupEventListeners();
-    
+
     setInterval(initializeDashboard, 1000);
 });
 
@@ -21,6 +21,139 @@ function initializeDashboard() {
         .then(data => {
             if (data.status === 'success') {
                 updateFeedbackQuestions(data.questions);
+            } else {
+                showToast('Error', data.message || 'Failed to load questions', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching feedback questions:', error);
+            showToast('Error', 'Failed to load feedback questions', 'error');
+        });
+}
+
+document.getElementById("exportFeedback").addEventListener("click", exportAll);
+
+// function exportAll(){
+//     fetch('/api/admin/feedback-questions')
+//         .then(response => response.json())
+//         .then(data => {
+//             if (data.status === 'success') {
+//                 const questions = data.questions;
+//                 console.log(questions);
+//
+//                 questions.forEach(question =>{
+//                     let question_id = question.id;
+//                     let question_type = question.question_type;
+//                     // exportResponse(question_id, question_type);
+//
+//
+//
+//                 })
+//             } else {
+//                 showToast('Error', data.message || 'Failed to load questions', 'error');
+//             }
+//         })
+//         .catch(error => {
+//             console.error('Error fetching feedback questions:', error);
+//             showToast('Error', 'Failed to load feedback questions', 'error');
+//         });
+// }
+
+function sanitizeFilename(filename) {
+    // Remove or replace characters not allowed in filenames
+    return filename
+        .replace(/[/\\?%*:|"<>]/g, '_')  // Replace forbidden characters with underscore
+        .replace(/\s+/g, '_')            // Replace spaces with underscore
+        .substring(0, 255)               // Limit filename length
+        .trim();                         // Remove leading/trailing whitespace
+}
+
+function fetchAndGenerateCSV(questionId, questionType) {
+    return fetch(`/admin/feedback-question/get-response/${questionId}?question_type=${questionType}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.question) {
+                // Sanitize the filename
+                const sanitizedFilename = sanitizeFilename(`${data.question}_responses.csv`);
+
+                return {
+                    filename: sanitizedFilename,
+                    content: convertToCSV({
+                        "Question ID": questionId,
+                        "Question Text": data.question,
+                        "Question Type": questionType,
+                        "Response": data.responses
+                    })
+                };
+            } else {
+                console.error(`Failed to fetch responses for question ${questionId}`);
+                return null;
+            }
+        })
+        .catch(error => {
+            console.error(`Error fetching responses for question ${questionId}:`, error);
+            return null;
+        });
+}
+
+function exportAll() {
+    fetch('/api/admin/feedback-questions')
+        .then(response => response.json())
+        .then(async data => {
+            if (data.status === 'success') {
+                const questions = data.questions;
+
+                // Use native File System Access API or fallback to multiple downloads
+                if ('showDirectoryPicker' in window) {
+                    // Modern browser approach using File System Access API
+                    try {
+                        const dirHandle = await window.showDirectoryPicker();
+
+                        for (const question of questions) {
+                            const csvData = await fetchAndGenerateCSV(question.id, question.question_type);
+                            if (csvData) {
+                                try {
+                                    const fileHandle = await dirHandle.getFileHandle(csvData.filename, { create: true });
+                                    const writable = await fileHandle.createWritable();
+                                    await writable.write(csvData.content);
+                                    await writable.close();
+                                } catch (fileError) {
+                                    console.error(`Error writing file ${csvData.filename}:`, fileError);
+                                    showToast('Error', `Failed to write file for question ${question.id}`, 'error');
+                                }
+                            }
+                        }
+
+                        showToast('Success', 'All responses exported successfully', 'success');
+                    } catch (error) {
+                        console.error('Export error:', error);
+                        showToast('Error', 'Failed to export responses', 'error');
+                    }
+                } else {
+                    // Fallback: Trigger multiple file downloads
+                    const promises = questions.map(question =>
+                        fetchAndGenerateCSV(question.id, question.question_type)
+                    );
+
+                    Promise.all(promises).then(files => {
+                        files.forEach(file => {
+                            if (file) {
+                                const blob = new Blob([file.content], { type: 'text/csv;charset=utf-8;' });
+                                const link = document.createElement('a');
+                                link.href = URL.createObjectURL(blob);
+                                link.download = file.filename;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            }
+                        });
+
+                        showToast('Success', 'All responses exported successfully', 'success');
+                    }).catch(error => {
+                        console.error('Export error:', error);
+                        showToast('Error', 'Failed to export responses', 'error');
+                    });
+                }
             } else {
                 showToast('Error', data.message || 'Failed to load questions', 'error');
             }
@@ -78,13 +211,13 @@ function updateFeedbackQuestions(questions) {
             editButton.innerHTML = '<i class="fas fa-edit"></i>';
             editButton.title = 'Edit Question';
             actionButtons.appendChild(editButton);
-            
+
             // Add event listener for edit
             editButton.addEventListener('click', () => editQuestion(question));
         } else {
             const reactivateButton = document.createElement('button');
             reactivateButton.classList.add('btn', 'btn-outline-success');
-            reactivateButton.innerHTML = '<i class="fas fa-sync-alt"></i>'; 
+            reactivateButton.innerHTML = '<i class="fas fa-sync-alt"></i>';
             reactivateButton.title = 'Reactivate Question'
             actionButtons.appendChild(reactivateButton)
             reactivateButton.onclick = () => reactivateQuestion(question.id);
@@ -92,31 +225,37 @@ function updateFeedbackQuestions(questions) {
 
         const deleteButton = document.createElement('button');
         deleteButton.classList.add('btn', 'btn-outline-danger');
-        
-        
+
+
         // Check if the question is active
         if (question.is_active) {
-            deleteButton.innerHTML = '<i class="fas fa-ban"></i>';  
+            deleteButton.innerHTML = '<i class="fas fa-ban"></i>';
             deleteButton.title = 'Deactivate Question';
             deleteButton.onclick = () => deactivateQuestion(question.id);
-        } else {    
-            deleteButton.innerHTML = '<i class="fas fa-trash"></i>';          
+        } else {
+            deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
             deleteButton.title = 'Delete Question';
             deleteButton.onclick = () => deleteQuestion(question.id);
         }
-        
+
 
         const viewResponsesButton = document.createElement('button');
         viewResponsesButton.classList.add('btn', 'btn-outline-info');
         viewResponsesButton.innerHTML = '<i class="fas fa-chart-pie"></i>';
         viewResponsesButton.title = 'View Responses';
 
+        const ExportButton = document.createElement('button');
+        ExportButton.classList.add('btn', 'btn-outline-success');
+        ExportButton.innerHTML = '<i class="fas fa-file-export"></i>';
+        ExportButton.title = 'Export Question';
+
         actionButtons.appendChild(deleteButton);
-        actionButtons.appendChild(viewResponsesButton)
+        actionButtons.appendChild(viewResponsesButton);
+        actionButtons.appendChild(ExportButton);
 
         questionItem.appendChild(questionContent);
         questionItem.appendChild(actionButtons);
-        
+
         if (question.is_active) {
             feedbackList.appendChild(questionItem); // Append to active feedback
         } else {
@@ -124,11 +263,13 @@ function updateFeedbackQuestions(questions) {
             pastFeedbackList.appendChild(questionItem); // Append to past feedback
         }
 
-        
+
         // Add event listener for view response
         viewResponsesButton.addEventListener('click', () => loadResponses(question.id, question.question_type));
+        // Add even listener for export
+        ExportButton.addEventListener('click', () => exportResponse(question.id, question.question_type));
     });
-        
+
 }
 
 // Deactivate question
@@ -199,7 +340,7 @@ function reactivateQuestion(questionId) {
         .then(response => response.json())
         .then(data => {
             const question = data.question;
-            
+
             // Check if the question is valid and has an active_end_date
             if (!question || !question.active_end_date) {
                 alert('Question data is not available or incomplete.');
@@ -262,7 +403,7 @@ function editQuestion(question) {
 function setupEventListeners() {
     const submitQuestionBtn = document.getElementById('submitQuestion');
     const feedbackModal = document.getElementById('feedbackModal');
-    
+
     submitQuestionBtn.addEventListener('click', () => {
         const form = document.getElementById('feedbackForm');
         const formData = new FormData(form);
@@ -278,7 +419,7 @@ function setupEventListeners() {
         }
 
         submitQuestionBtn.disabled = true;
-        
+
         fetch('/admin/feedback-question', {
             method: 'POST',
             body: formData
@@ -442,7 +583,7 @@ function showToast(title, message, type = 'info') {
     toastElement.classList.add('toast');
     toastElement.classList.add(`bg-${type === 'error' ? 'danger' : type}`);
     toastElement.classList.add('text-white');
-    
+
     toastElement.innerHTML = `
         <div class="toast-header">
             <strong class="me-auto">${title}</strong>
@@ -524,4 +665,110 @@ function deleteSurveyLink(id) {
         console.error('Error:', error);
         showToast('Error', error.message, 'error');
     });
+}
+
+function exportResponse(questionId, questionType){
+    console.log('exportResponse function triggered');
+
+    // Show the modal immediately
+    // const responsesModal = new bootstrap.Modal(document.getElementById('responsesModal'));
+    // responsesModal.show();
+
+    // Create a URL to fetch responses based on the question ID
+    const url = `/admin/feedback-question/get-response/${questionId}`;
+    console.log(`Making GET request to: ${url}`);  // Log the URL being called
+
+    // Prepare query parameters (question_type will be included in the URL itself)
+    const params = new URLSearchParams({ question_type: questionType });
+
+    // Append query parameters to the URL
+    const finalUrl = `${url}?${params.toString()}`;
+
+    // Fetch responses from the server
+    fetch(finalUrl, {
+        method: 'GET', // This is a GET request
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Handle the data returned by the server
+        if (data.question) {
+
+            let csv_content = {"Question ID": questionId, "Question Text": data.question, "Question Type": questionType, "Response":data.responses};
+            console.log(csv_content);
+
+            // Convert to CSV
+            const csvContent = convertToCSV(csv_content);
+
+            // Create a Blob from the CSV content
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+            // Create a link to trigger the download
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${data.question}_responses.csv`; // Filename to download as
+
+            // Append the link to the document body, trigger the download, then remove the link
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Show success toast or message
+            showToast('Success', 'Question responses exported successfully', 'success');
+        }
+        else {
+            console.error('Failed to load responses:', data.error || 'Unknown error');
+        }
+    })
+    .catch(error => {
+        console.error('Error loading responses:', error);
+        showToast('Error', 'Failed to load responses: ' + error.message, 'error');
+    });
+}
+function convertToCSV(data) {
+    function escapeCSV(value) {
+        if (value == null) return '';
+        const stringValue = String(value);
+        const escapedValue = stringValue.replace(/"/g, '""');
+        return escapedValue.includes(',') ? `"${escapedValue}"` : escapedValue;
+    }
+
+    const csvRows = [];
+    csvRows.push(['Question ID', 'Question Text', 'Question Type'].map(escapeCSV).join(','));
+    csvRows.push([
+        data['Question ID'] || 'N/A',
+        data['Question Text'] || 'N/A',
+        data['Question Type'] || 'N/A'
+    ].join(','));
+
+    // Check if the question type is 'rating' and handle the responses accordingly
+    if (data['Question Type'] === 'rating') {
+        csvRows.push(['Rating', 'Count'].map(escapeCSV).join(','));
+
+        // Iterate over the response data, which is an object of ratings and counts
+        for (let i = 1; i <= 5; i++) {
+            csvRows.push(`${i},${data['Response'][i] || 0}`);
+        }
+    }
+    else if(data['Question Type'] === 'text'){
+        csvRows.push(['Count', 'Response'].map(escapeCSV).join(','));
+        let index = 0;
+
+        for (let i=0; i <= data['Response'].length-1; i++){
+            index = i;
+            csvRows.push(`${index}, ${data['Response'][i] ||''} `);
+        }
+
+    }
+    else if(data['Question Type'] === 'yes-no'){
+        csvRows.push(['Response', 'Count'].map(escapeCSV).join(','));
+
+        csvRows.push(`Yes, ${data['Response']['yes'] || 0}`);
+        csvRows.push(`No, ${data['Response']['no'] || 0}`);
+
+    }
+    else {
+        csvRows.push(['Unsupported question type']);
+    }
+
+    return csvRows.join('\n');
 }

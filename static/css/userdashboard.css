@@ -356,5 +356,38 @@
     }
 }
 
+/* Add to userdashboard.css */
+.rating-group label.btn {
+    min-width: 45px;
+    transition: all 0.2s ease;
+}
+
+.rating-group label.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn-check:checked + label.btn {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.question-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.answer-container {
+    min-height: 100px;
+}
+
+/* Toast styling */
+.toast-container {
+    z-index: 1056;
+}
+
+.toast {
+    opacity: 0.95;
+}
+
 
 
