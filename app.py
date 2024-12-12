@@ -10,7 +10,9 @@ from dotenv import load_dotenv
 import os
 import logging
 import sys
+from popupfeedback import popup_feedback_bp
 y = SchedulerService()
+
 
 def create_app(test_config=None):
    # Load environment variables
@@ -68,6 +70,8 @@ def create_app(test_config=None):
    app.register_blueprint(google_bp, url_prefix="/login")
    app.register_blueprint(main_blueprint)
    app.register_blueprint(menu_bp, url_prefix='/api/menu')
+   app.register_blueprint(popup_feedback_bp, url_prefix='/api/feedback')
+
 
    app.config.update({
         'MENU_API_USERNAME': os.getenv('MENU_API_USERNAME'),
@@ -84,6 +88,7 @@ if __name__ == '__main__':
             create_tags()
             # Get logger instance
             logger = logging.getLogger(__name__)
+
             logger.info("Database initialized successfully")
             app.run(debug=os.getenv('FLASK_ENV') == 'development', port=8000)
         except Exception as e:
