@@ -148,8 +148,8 @@ def deactivate_feedback_question(question_id):
         question = FeedbackQuestion.query.get_or_404(question_id)
         
         # Ensure the user has permission to deactivate the question
-        if question.administrator_id != current_user.admin_email:
-            return jsonify({'status': 'error', 'message': 'Unauthorized to deactivate this question'}), 403
+        # if question.administrator_id != current_user.admin_email:
+        #     return jsonify({'status': 'error', 'message': 'Unauthorized to deactivate this question'}), 403
 
         # Deactivate the question if it is active
         if question.is_active:
@@ -193,9 +193,9 @@ def reactivate_feedback_question(question_id):
     try:
         question = FeedbackQuestion.query.get_or_404(question_id)
         
-        # Check if the current user is the administrator who created the question
-        if question.administrator_id != current_user.admin_email:
-            return jsonify({'status': 'error', 'message': 'Unauthorized to reactivate this question'}), 403
+        # # Check if the current user is the administrator who created the question
+        # if question.administrator_id != current_user.admin_email:
+        #     return jsonify({'status': 'error', 'message': 'Unauthorized to reactivate this question'}), 403
 
         # Reactivate the question
         question.is_active = True
