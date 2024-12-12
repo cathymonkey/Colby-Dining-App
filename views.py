@@ -857,7 +857,6 @@ def submit_feedback_response():
                 'status': 'error',
                 'message': 'Invalid or inactive question'
             }), 400
-
         if content.type == 'text':
             user_text = content.response
 
