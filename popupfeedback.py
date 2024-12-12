@@ -4,7 +4,7 @@ from models import db, FeedbackQuestion, YesNoResponse, RatingResponse, ShortAns
 import logging
 import google.generativeai as genai
 
-genai.configure(api_key="AIzaSyCKBBfHkuxEw4AyXWZFlmNGbahC_okDmbg")
+genai.configure(api_key="")
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 # response = model.generate_content("Explain how AI works")
