@@ -209,14 +209,6 @@ header h1 {
     border: 1px solid #dee2e6;
 }
 
-.collapse-icon {
-    transition: transform 0.2s ease;
-}
-
-.station-header[aria-expanded="true"] .collapse-icon {
-    transform: rotate(180deg);
-}
-
 /* Menu Items */
 .menu-items-grid {
     display: grid;

@@ -205,38 +205,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }, {});
         },
 
-        // createStationsHtml(stations) {
-        //     return Object.entries(stations).map(([stationName, items]) => `
-        //         <div class="station-section" data-bs-toggle="collapse">
-        //             <h3>${stationName}</h3>
-        //             <div class="menu-items-grid">
-        //                 ${items.map(item => this.createItemHtml(item)).join('')}
-        //             </div>
-        //         </div>
-        //     `).join('');
-        // },
         createStationsHtml(stations) {
-    return Object.entries(stations).map(([stationName, items], index) => `
-        <div class="station-section">
-            <h3 
-                class="station-header" 
-                data-bs-toggle="collapse" 
-                data-bs-target="#station-${index}" 
-                aria-expanded="false" 
-                aria-controls="station-${index}"
-            >
-                ${stationName}
-                <i class="collapse-icon"></i>
-            </h3>
-            <div 
-                id="station-${index}" 
-                class="menu-items-grid collapse"
-            >
-                ${items.map(item => this.createItemHtml(item)).join('')}
-            </div>
-        </div>
-    `).join('');
-},
+            return Object.entries(stations).map(([stationName, items]) => `
+                <div class="station-section" data-bs-toggle="collapse">
+                    <h3>${stationName}</h3>
+                    <div class="menu-items-grid">
+                        ${items.map(item => this.createItemHtml(item)).join('')}
+                    </div>
+                </div>
+            `).join('');
+        },
 
         createItemHtml(item) {
             // First, let's check if this item is in favorites
