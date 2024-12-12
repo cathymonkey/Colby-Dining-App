@@ -864,7 +864,7 @@ def submit_feedback_response():
             genai.configure(api_key=key)
             model = genai.GenerativeModel("gemini-1.5-flash")
 
-            processed_text = model.generate_content("you are given a feedback response from a user, check if the response is a valid, relevaent response that is not rude, if that's true, output the response as it is, if not output INVALID:" + user_text)
+            processed_text = model.generate_content("You are given a feedback response from a user, check if the response contains any form of hate speech. If so, return 'RESPONSE REMOVED' else, return the original response as it is without any other modification. USER RESPONSE:" + user_text)
 
             new_response = Response(
                 content=processed_text,
