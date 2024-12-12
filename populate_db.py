@@ -37,7 +37,7 @@ def generate_wait_times():
                 db.session.add(wait_time)
     
     db.session.commit()
-    print(f"Generated {WaitTime.query.count()} wait time records.")
+    print(f"Generated {WaitTime.query.count()} wait time records.")\
 
 def generate_feedback_questions():
     """Generates test feedback questions for the database."""

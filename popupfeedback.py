@@ -7,7 +7,7 @@ import google.generativeai as genai
 genai.configure(api_key="")
 model = genai.GenerativeModel("gemini-1.5-flash")
 
-# response = model.generate_content("Explain how AI works")
+# response = model.generate_content("")
 # print(response.text)
 
 
@@ -37,14 +37,12 @@ def handle_popup_feedback():
     if question_type == 'yes_no':
         response = YesNoResponse(
             feedback_id=question_id,
-            user_id=user_id,
             content=str(data.get('is_yes')),
             is_yes=data.get('is_yes')
         )
     elif question_type == 'rating':
         response = RatingResponse(
             feedback_id=question_id,
-            user_id=user_id,
             content=str(data.get('rating')),
             rating=data.get('rating')
         )
@@ -56,7 +54,6 @@ def handle_popup_feedback():
 
         response = ShortAnswerResponse(
             feedback_id=question_id,
-            user_id=user_id,
             content=data.get('answer_text'),
             answer_text=gemini_response
         )

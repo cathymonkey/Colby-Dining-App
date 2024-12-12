@@ -93,7 +93,6 @@ def menu():
 
     # Pass the filtered food items and selected tags to the template
     return render_template('menu.html', foods=filtered_foods, selected_tags=selected_tags, all_tags=all_tags)
-
 @main_blueprint.route('/contact')
 def contact():
     return render_template('contact.html')
