@@ -79,8 +79,9 @@ def dining_experience():
 def team():
     return render_template('team.html')
 
-
-
+@main_blueprint.route('/news')
+def news():
+    return render_template('news.html')
 
 @main_blueprint.route('/menu', methods=['GET'])
 def menu():
