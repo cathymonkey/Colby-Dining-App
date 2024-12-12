@@ -18,6 +18,7 @@ from email_utils import EmailSender
 from typing import Dict, List, Optional
 from menu_api import BonAppetitAPI
 from utils import deactivate_expired_questions
+import google.generativeai as genai
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -857,12 +858,27 @@ def submit_feedback_response():
                 'message': 'Invalid or inactive question'
             }), 400
 
-        # Create new response
-        new_response = Response(
-            content=content,
-            question_id=question_id,
-            created_at=datetime.now()
-        )
+        if content.type == 'text':
+            user_text = content.response
+
+            key=os.getenv('GEMINI_KEY')
+            genai.configure(api_key=key)
+            model = genai.GenerativeModel("gemini-1.5-flash")
+
+            processed_text = model.generate_content("you are given a feedback response from a user, check if the response is a valid, relevaent response that is not rude, if that's true, output the response as it is, if not output INVALID:" + user_text)
+
+            new_response = Response(
+                content=processed_text,
+                question_id=question_id,
+                created_at=datetime.now()
+            )
+        else:
+            # Create new response
+            new_response = Response(
+                content=content,
+                question_id=question_id,
+                created_at=datetime.now()
+            )
         
         db.session.add(new_response)
         db.session.commit()
