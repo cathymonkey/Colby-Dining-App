@@ -230,6 +230,9 @@ def get_feedback_question(question_id):
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+
+@login_required
+@admin_required
 @main_blueprint.route('/api/admin/feedback-questions', methods=['GET'])
 def get_feedback_questions():
     deactivate_expired_questions()

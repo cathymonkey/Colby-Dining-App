@@ -31,6 +31,139 @@ function initializeDashboard() {
         });
 }
 
+document.getElementById("exportFeedback").addEventListener("click", exportAll);
+
+// function exportAll(){
+//     fetch('/api/admin/feedback-questions')
+//         .then(response => response.json())
+//         .then(data => {
+//             if (data.status === 'success') {
+//                 const questions = data.questions;
+//                 console.log(questions);
+//
+//                 questions.forEach(question =>{
+//                     let question_id = question.id;
+//                     let question_type = question.question_type;
+//                     // exportResponse(question_id, question_type);
+//
+//
+//
+//                 })
+//             } else {
+//                 showToast('Error', data.message || 'Failed to load questions', 'error');
+//             }
+//         })
+//         .catch(error => {
+//             console.error('Error fetching feedback questions:', error);
+//             showToast('Error', 'Failed to load feedback questions', 'error');
+//         });
+// }
+
+function sanitizeFilename(filename) {
+    // Remove or replace characters not allowed in filenames
+    return filename
+        .replace(/[/\\?%*:|"<>]/g, '_')  // Replace forbidden characters with underscore
+        .replace(/\s+/g, '_')            // Replace spaces with underscore
+        .substring(0, 255)               // Limit filename length
+        .trim();                         // Remove leading/trailing whitespace
+}
+
+function fetchAndGenerateCSV(questionId, questionType) {
+    return fetch(`/admin/feedback-question/get-response/${questionId}?question_type=${questionType}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.question) {
+                // Sanitize the filename
+                const sanitizedFilename = sanitizeFilename(`${data.question}_responses.csv`);
+
+                return {
+                    filename: sanitizedFilename,
+                    content: convertToCSV({
+                        "Question ID": questionId,
+                        "Question Text": data.question,
+                        "Question Type": questionType,
+                        "Response": data.responses
+                    })
+                };
+            } else {
+                console.error(`Failed to fetch responses for question ${questionId}`);
+                return null;
+            }
+        })
+        .catch(error => {
+            console.error(`Error fetching responses for question ${questionId}:`, error);
+            return null;
+        });
+}
+
+function exportAll() {
+    fetch('/api/admin/feedback-questions')
+        .then(response => response.json())
+        .then(async data => {
+            if (data.status === 'success') {
+                const questions = data.questions;
+
+                // Use native File System Access API or fallback to multiple downloads
+                if ('showDirectoryPicker' in window) {
+                    // Modern browser approach using File System Access API
+                    try {
+                        const dirHandle = await window.showDirectoryPicker();
+
+                        for (const question of questions) {
+                            const csvData = await fetchAndGenerateCSV(question.id, question.question_type);
+                            if (csvData) {
+                                try {
+                                    const fileHandle = await dirHandle.getFileHandle(csvData.filename, { create: true });
+                                    const writable = await fileHandle.createWritable();
+                                    await writable.write(csvData.content);
+                                    await writable.close();
+                                } catch (fileError) {
+                                    console.error(`Error writing file ${csvData.filename}:`, fileError);
+                                    showToast('Error', `Failed to write file for question ${question.id}`, 'error');
+                                }
+                            }
+                        }
+
+                        showToast('Success', 'All responses exported successfully', 'success');
+                    } catch (error) {
+                        console.error('Export error:', error);
+                        showToast('Error', 'Failed to export responses', 'error');
+                    }
+                } else {
+                    // Fallback: Trigger multiple file downloads
+                    const promises = questions.map(question =>
+                        fetchAndGenerateCSV(question.id, question.question_type)
+                    );
+
+                    Promise.all(promises).then(files => {
+                        files.forEach(file => {
+                            if (file) {
+                                const blob = new Blob([file.content], { type: 'text/csv;charset=utf-8;' });
+                                const link = document.createElement('a');
+                                link.href = URL.createObjectURL(blob);
+                                link.download = file.filename;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            }
+                        });
+
+                        showToast('Success', 'All responses exported successfully', 'success');
+                    }).catch(error => {
+                        console.error('Export error:', error);
+                        showToast('Error', 'Failed to export responses', 'error');
+                    });
+                }
+            } else {
+                showToast('Error', data.message || 'Failed to load questions', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching feedback questions:', error);
+            showToast('Error', 'Failed to load feedback questions', 'error');
+        });
+}
+
 function updateFeedbackQuestions(questions) {
     const feedbackList = document.getElementById('feedbackList');
     feedbackList.innerHTML = ''; // Clear existing content
@@ -111,7 +244,7 @@ function updateFeedbackQuestions(questions) {
         viewResponsesButton.innerHTML = '<i class="fas fa-chart-pie"></i>';
         viewResponsesButton.title = 'View Responses';
 
-         const ExportButton = document.createElement('button');
+        const ExportButton = document.createElement('button');
         ExportButton.classList.add('btn', 'btn-outline-success');
         ExportButton.innerHTML = '<i class="fas fa-file-export"></i>';
         ExportButton.title = 'Export Question';
