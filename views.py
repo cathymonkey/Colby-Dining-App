@@ -860,6 +860,7 @@ def submit_feedback_response():
 
         if content.type == 'text':
             user_text = content.response
+
             key=os.getenv('GEMINI_KEY')
             genai.configure(api_key=key)
             model = genai.GenerativeModel("gemini-1.5-flash")
