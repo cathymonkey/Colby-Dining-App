@@ -14,7 +14,6 @@ Flask-Migrate==4.0.5
 oauthlib==3.2.2
 python-dotenv==1.0.0
 mysql-connector-python==8.3.0
-google.generativeai
 APScheduler==3.10.1
 
 # Specify platform-specific wheels
