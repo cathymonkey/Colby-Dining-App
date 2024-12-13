@@ -1,0 +1,5 @@
+website/data/
+.idea/
+__pycache__/
+.env
+.coverage
