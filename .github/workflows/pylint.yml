@@ -25,4 +25,4 @@ jobs:
         
     - name: Testing the code with pytest
       run: |
-        pytest $(git ls-files 'test_*.py.py')
+        pytest --cov --cov-fail-under=20 $(git ls-files 'test_*.py')
