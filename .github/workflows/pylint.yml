@@ -28,3 +28,4 @@ jobs:
       continue-on-error: true
       run: |
         pytest --cov -v --cov-report term-missing $(git ls-files 'test_*.py') 
+
