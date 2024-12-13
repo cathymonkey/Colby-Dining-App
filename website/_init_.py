@@ -1,11 +1,11 @@
 from flask import Flask
 from scheduler import SchedulerService
-from models import db
+from website.models import db
 from flask_login import LoginManager
-from views import main_blueprint
-from menu_routes import menu_bp
+from website.views import main_blueprint
+from website.menu_routes import menu_bp
 from utils import create_tags
-from auth import auth_bp, google_bp, login_manager, init_admin_model
+from website.auth import auth_bp, google_bp, login_manager, init_admin_model
 from dotenv import load_dotenv
 import os
 import logging
