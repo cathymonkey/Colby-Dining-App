@@ -2,7 +2,7 @@ from sqlalchemy import cast, Date, and_, exists
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for
 from flask import Blueprint, render_template, redirect, url_for
 from flask import request, current_app
-from website.models import db, Food, Tag, food_tags, Response
+from models import db, Food, Tag, food_tags, Response
 from flask_login import login_required, current_user
 from utils import filter_foods, get_all_foods
 from flask import Blueprint, render_template, jsonify
@@ -11,12 +11,12 @@ from flask_login import current_user, login_required
 from datetime import datetime, timedelta
 import os
 import logging
-from website.auth import admin_required
+from auth import admin_required
 from dining_predictor import DiningHallPredictor
-from website.models import db, FeedbackQuestion, Administrator, FavoriteDish, SurveyLink
+from models import db, FeedbackQuestion, Administrator, FavoriteDish, SurveyLink
 from email_utils import EmailSender
 from typing import Dict, List, Optional
-from website.menu_api import BonAppetitAPI
+from menu_api import BonAppetitAPI
 from utils import deactivate_expired_questions
 import google.generativeai as genai
 
