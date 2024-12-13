@@ -1,4 +1,4 @@
-from app import create_app, db
+from website import create_app, db
 from models import Administrator
 from werkzeug.security import generate_password_hash
 from datetime import datetime
