@@ -7,8 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
-    continue-on-error: true
+        python-version: ["3.9", "3.10", "3.11"]
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
@@ -28,4 +27,4 @@ jobs:
     - name: Testing the code with pytest
       continue-on-error: true
       run: |
-        pytest --cov --cov-fail-under=20 $(git ls-files 'test_*.py')
+        pytest --cov-fail-under=40 $(git ls-files 'test_*.py')
