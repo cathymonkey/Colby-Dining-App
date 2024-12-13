@@ -856,33 +856,37 @@ def submit_feedback_response():
 
         # Check if question exists and is active
         question = FeedbackQuestion.query.get(question_id)
-        if not question or not question.is_active:
-            return jsonify({
-                'status': 'error',
-                'message': 'Invalid or inactive question'
-            }), 400
-        if content.type == 'text':
-            user_text = content.response
-
-            key=os.getenv('GEMINI_KEY')
-            genai.configure(api_key=key)
-            model = genai.GenerativeModel("gemini-1.5-flash")
-
-            processed_text = model.generate_content("You are given a feedback response from a user, check if the response contains any form of hate speech. If so, return 'RESPONSE REMOVED' else, return the original response as it is without any other modification. USER RESPONSE:" + user_text)
-
-            new_response = Response(
-                content=processed_text,
-                question_id=question_id,
-                created_at=datetime.now()
-            )
-        else:
-            # Create new response
-            new_response = Response(
-                content=content,
-                question_id=question_id,
-                created_at=datetime.now()
-            )
-        
+        # if not question or not question.is_active:
+        #     return jsonify({
+        #         'status': 'error',
+        #         'message': 'Invalid or inactive question'
+        #     }), 400
+        # if content.type == 'text':
+        #     user_text = content.response
+        #
+        #     key=os.getenv('GEMINI_KEY')
+        #     genai.configure(api_key=key)
+        #     model = genai.GenerativeModel("gemini-1.5-flash")
+        #
+        #     processed_text = model.generate_content("You are given a feedback response from a user, check if the response contains any form of hate speech. If so, return 'RESPONSE REMOVED' else, return the original response as it is without any other modification. USER RESPONSE:" + user_text)
+        #
+        #     new_response = Response(
+        #         content=processed_text,
+        #         question_id=question_id,
+        #         created_at=datetime.now()
+        #     )
+        # else:
+        #     # Create new response
+        #     new_response = Response(
+        #         content=content,
+        #         question_id=question_id,
+        #         created_at=datetime.now()
+        #     )
+        new_response = Response(
+                    content=content,
+                    question_id=question_id,
+                    created_at=datetime.now()
+                )
         db.session.add(new_response)
         db.session.commit()
         

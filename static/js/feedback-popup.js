@@ -11,7 +11,7 @@ class FeedbackPopupManager {
         if (path === '/' || path === '/menu') {
             console.log('Initializing feedback popup on:', path);
             
-            // Check if we've already shown a popup today
+            //Check if we've already shown a popup today
             if (this.hasShownTodayPopup()) {
                 console.log('Already shown popup today, skipping');
                 return;
