@@ -22,6 +22,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     setInterval(initializeDashboard, 1000);
+
+    const today = new Date();
+    today.setDate(today.getDate() + 1);  // Add one day to today's date
+        
+    const tomorrow = today.toISOString().split('T')[0];
+
+    document.getElementById('activeStartDate').setAttribute('min', tomorrow);
+    document.getElementById('activeEndDate').setAttribute('min', tomorrow);
 });
 
 function initializeDashboard() {
