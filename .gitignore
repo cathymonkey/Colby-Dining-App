@@ -3,3 +3,4 @@ website/data/
 __pycache__/
 .env
 .coverage
+instance/
