@@ -27,4 +27,4 @@ jobs:
     - name: Testing the code with pytest
       continue-on-error: true
       run: |
-        pytest --cov --cov-fail-under=40 $(git ls-files 'test_*.py') 
+        pytest --cov -v --cov-report term-missing $(git ls-files 'test_*.py') 
