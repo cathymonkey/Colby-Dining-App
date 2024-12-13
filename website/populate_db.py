@@ -1,5 +1,5 @@
-from app import create_app
-from models import db, WaitTime, Food, Tag, FeedbackQuestion, Response
+from website import create_app
+from website.models import db, WaitTime, Food, Tag, FeedbackQuestion, Response
 from datetime import datetime, time, timedelta
 import random
 
